@@ -14,5 +14,7 @@ Status:
 
 ---
 
-❌ Project
+⌛ - Creation of base model classes.
+
+⌛ - Design communication architecture.
 
