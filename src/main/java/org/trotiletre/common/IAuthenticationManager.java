@@ -15,7 +15,6 @@ public interface IAuthenticationManager {
      */
     public void registerUser(String username, String password) throws IOException;
 
-
     public void loginUser(String username, String password) throws IOException;
 
 }

@@ -1,6 +1,7 @@
 package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.communication.Skeleton;
+import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.ScooterManager;
 
@@ -24,7 +25,7 @@ public class ScooterManagerSkeleton implements Skeleton {
     public ScooterManagerSkeleton(ScooterManager server) { this.server = server; }
 
     @Override
-    public void handle(DataInputStream in, DataOutputStream out) throws Exception {
+    public void handle(byte[] data) throws Exception {
         System.out.println("Message to Manager!");
     }
 

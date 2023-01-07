@@ -8,15 +8,15 @@ import java.net.Socket;
 
 public class ScooterManagerStub implements IScooterManager {
 
-    private Socket socket = null;
-    private DataInputStream in = null;
-    private DataOutputStream out = null;
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
 
-    public ScooterManagerStub() {
+    public ScooterManagerStub(Socket socket) {
 
         try {
 
-            this.socket = new Socket("localhost", 20022);
+            this.socket = socket;
             this.in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             this.out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
 

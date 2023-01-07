@@ -3,34 +3,31 @@ package org.trotiletre.client;
 import org.trotiletre.client.stubs.AuthenticationManagerStub;
 import org.trotiletre.client.stubs.ScooterManagerStub;
 import org.trotiletre.common.IScooterManager;
+import org.trotiletre.common.communication.TaggedConnection;
 
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 
 public class ScooterManagerRCPClient {
 
-    private ScooterManagerStub scooterManager = new ScooterManagerStub();
 
     public static void main(String[] args) throws IOException {
 
-        AuthenticationManagerStub authManager = new AuthenticationManagerStub();
+        Socket clientSocket = new Socket("localhost", 20022);
+        TaggedConnection connection = new TaggedConnection(clientSocket);
 
-        String username = "gweebg";
-        String password = "password";
+        DataOutputStream dataOutput = new DataOutputStream(new BufferedOutputStream(clientSocket.getOutputStream()));
+
+        // ScooterManagerStub scooterManager = new ScooterManagerStub(connection);
+        AuthenticationManagerStub authManager = new AuthenticationManagerStub(connection, dataOutput);
+
+        String username = "babi";
+        String password = "password_da_babi";
 
         authManager.registerUser(username, password);
-
         authManager.loginUser(username, password);
-
-        System.in.read();
-
     }
-
-    /*
-    Example of possible usage:
-    scooterManager.login()
-    scooterManager.moveScooter()
-    ...
-    */
-
 }

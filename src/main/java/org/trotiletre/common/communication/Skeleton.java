@@ -13,9 +13,8 @@ public interface Skeleton {
     /**
      * Handles the given input and output streams.
      *
-     * @param in The input stream.
-     * @param out The output stream.
+     * @param receivedData The connection object.
      * @throws Exception If an error occurs while handling the streams.
      */
-    public void handle(DataInputStream in, DataOutputStream out) throws Exception;
+    public void handle(byte[] receivedData) throws Exception;
 }

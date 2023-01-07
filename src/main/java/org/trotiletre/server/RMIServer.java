@@ -1,6 +1,7 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
+import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.ScooterManager;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
@@ -64,6 +65,7 @@ public class RMIServer {
         // Register service skeletons.
         services.put(0, new ScooterManagerSkeleton(new ScooterManager()));
         services.put(1, new AuthenticationManagerSkeleton(new AuthenticationManager()));
+        //services.put(2, new NotificationManagerSkeleton(new NotificationManager()));
 
         // Listen for incoming connections.
         while (true) {
@@ -71,10 +73,8 @@ public class RMIServer {
             try {
 
                 Socket s = socket.accept();
-
                 Worker worker = new Worker(s, services);
-                Thread t = new Thread(worker);
-                t.start();
+                new Thread(worker).start();
 
             } catch (IOException e) {
                 System.out.println(e.getMessage());
