@@ -21,6 +21,10 @@ public class User {
         this.passwordHash = hashedPassword;
     }
 
+    public User(String username) {
+        this.username = username;
+    }
+
     /**
      * Sets the password for the user.
      * <p>
@@ -31,6 +35,17 @@ public class User {
     public void setPassword(String password) {
         Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15*1024, 2);
         this.passwordHash = encoder.encode(password);
+    }
+
+    /**
+     * Checks if the provided password is correct or not.
+     *
+     * @param password The hashed password to test.
+     * @return {@code true} if they match, {@code false} otherwise.
+     */
+    public boolean matchPassword(String password) {
+        Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15*1024, 2);
+        return encoder.matches(password, passwordHash);
     }
 
     /**

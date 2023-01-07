@@ -1,6 +1,10 @@
-package org.trotiletre.server.services;
+package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
+import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ScooterManager;
+import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
+import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -52,28 +56,38 @@ public class RMIServer {
      */
     public void runServer() throws Exception {
 
+        System.out.println("Running server...");
+
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
 
         // Register service skeletons.
-        services.put(0, new ServerSkeletonImplementation(new Server()));
+        services.put(0, new ScooterManagerSkeleton(new ScooterManager()));
+        services.put(1, new AuthenticationManagerSkeleton(new AuthenticationManager()));
 
         // Listen for incoming connections.
         while (true) {
 
-            try (Socket s = socket.accept()) {
+            try {
 
-                // Create input and output streams.
-                var in = new DataInputStream(new BufferedInputStream(s.getInputStream()));
-                var out = new DataOutputStream(new BufferedOutputStream(s.getOutputStream()));
+                Socket s = socket.accept();
 
-                // Get the appropriate service skeleton.
-                Skeleton service = services.get(in.readInt());
-                service.handle(in, out); // Delegate the handling of the streams to the service skeleton.
+                Worker worker = new Worker(s, services);
+                Thread t = new Thread(worker);
+                t.start();
 
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
             }
 
         }
+
+    }
+
+    public static void main(String[] args) throws Exception {
+
+        RMIServer server = new RMIServer(20022);
+        server.runServer();
 
     }
 
