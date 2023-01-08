@@ -62,10 +62,13 @@ public class RMIServer {
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
 
+        // Creating the authentication, notification and scooter services.
+        AuthenticationManager authManager = new AuthenticationManager();
+        ScooterManager scooterManager = new ScooterManager(authManager);
+
         // Register service skeletons.
-        services.put(1, new AuthenticationManagerSkeleton(new AuthenticationManager()));
-        services.put(0, new ScooterManagerSkeleton(new ScooterManager(...)));
-        //services.put(2, new NotificationManagerSkeleton(new NotificationManager()));
+        services.put(0, new ScooterManagerSkeleton(scooterManager));
+        services.put(1, new AuthenticationManagerSkeleton(authManager));
 
         // Listen for incoming connections.
         while (true) {
