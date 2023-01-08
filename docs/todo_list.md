@@ -2,7 +2,7 @@
 
 ---
 
-Last updated at: **06/01/2023**
+Last updated at: **08/01/2023**
 
 ---
 
@@ -18,3 +18,8 @@ Status:
 
 ✅ - Design communication architecture.
 
+⌛ - Finish base operations.
+
+❌ - Check for authentication.
+
+❌ - Test the application.

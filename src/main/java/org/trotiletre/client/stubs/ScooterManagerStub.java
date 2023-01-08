@@ -1,21 +1,26 @@
 package org.trotiletre.client.stubs;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.trotiletre.common.IScooterManager;
 import org.trotiletre.common.communication.TaggedConnection;
-import org.trotiletre.models.User;
+import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
 
-import javax.swing.text.html.HTML;
 import java.io.*;
-import java.net.Socket;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * A stub implementation of the {@link IScooterManager} interface.
+ */
 public class ScooterManagerStub implements IScooterManager {
 
-    private TaggedConnection connection;
+    private TaggedConnection connection; // The connection to the client.
 
+    /**
+     * Constructs a new {@code ScooterManagerStub} object.
+     *
+     * @param connection a {@link TaggedConnection} object representing the connection to the client.
+     */
     public ScooterManagerStub(TaggedConnection connection) {
             this.connection = connection;
     }
@@ -23,37 +28,144 @@ public class ScooterManagerStub implements IScooterManager {
     @Override
     public @NotNull String listFreeScooters(int range, @NotNull Location lookupPosition) throws IOException {
 
-        // Since the tagged connection takes a byte[] a parameter, we write to a stream
-        // and then convert it into the byte[].
+        /*
+         * This section handles the requests for listing the free scooters.
+         * The message we are expecting to receive will have:
+         *  + x coordinate of the user's position: Integer.
+         *  + y coordinate of the user's position: Integer.
+         *  + The range of the search for scooters: Integer.
+         */
+
+        // Creating our own byte stream, so we can send it via tagged connection.
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(dataStream);
 
         dataOutput.writeInt(0); // Writing the operation we want to use.
-        dataOutput.writeInt(range); // Writing the range of search.
+
         dataOutput.writeInt(lookupPosition.x()); // Writing the x inital position.
         dataOutput.writeInt(lookupPosition.y()); // Writing the y inital position.
+        dataOutput.writeInt(range); // Writing the range of search.
 
         // Converting the ByteArrayOutputStream into a primitive byte[].
         byte[] data = dataStream.toByteArray();
-
         connection.send(0, data); // Sending the message to the server.
+
+        // The response is a byte encoded string with all the locations. This means we just need to convert it back.
+        TaggedConnection.Frame frame = connection.receive();
+        return new String(frame.data, StandardCharsets.UTF_8); // Return the converted string from the bytes received.
+    }
+
+    @Override
+    public GenericPair<String, Location> reserveScooter(int range, @NotNull Location local, String username) throws IOException {
+
+        /*
+         * This section handles the requests for renting a free scooters.
+         * The message we are expecting to receive will have:
+         *  + The range of the search for scooters: Integer.
+         *  + x coordinate of the user's position: Integer.
+         *  + y coordinate of the user's position: Integer.
+         *  + The user's username, used to check whether he is authenticated.
+         *
+         *  This operation requires authentication.
+         */
+
+        // Creating our own byte stream, so we can send it via tagged connection.
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(dataStream);
+
+        dataOutput.writeInt(1); // Writing the operation we want to use.
+
+        dataOutput.writeInt(range); // Writing the range of search.
+        dataOutput.writeInt(local.x()); // Writing the x inital position.
+        dataOutput.writeInt(local.y()); // Writing the y inital position.
+        dataOutput.writeUTF(username); // Writing the username for authentication.
+
+        connection.send(0, dataStream.toByteArray()); // Sending the message to the server.
+
+        // Receiving the response from the server as a frame.
         TaggedConnection.Frame frame = connection.receive();
 
-        System.out.println("Tag: " + frame.tag);
-        System.out.println("Data: " + Arrays.toString(frame.data));
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(frame.data);
+        DataInput response = new DataInputStream(responseStream);
 
-        return Arrays.toString(frame.data);
+        /*
+         * The response code determines the output of the request made.
+         * The response code can be:
+         *   0 - Normal behaviour;
+         *   1 - There are no scooters available;
+         *   2 - User is not logged in.
+         */
+        int responseCode = response.readInt();
+
+        if (responseCode == 1) return new GenericPair<>("There were no scooters found in the area.", null);
+
+        else if (responseCode == 2) return new GenericPair<>("You need to log in before renting a scooter!", null);
+
+        else {
+
+            String reservationCode = response.readUTF();
+            int locationX = response.readInt();
+            int locationY = response.readInt();
+
+            return new GenericPair<>(reservationCode, new Location(locationX, locationY));
+        }
     }
 
     @Override
-    public @Nullable String reserveScooter(int range, @NotNull Location local, String username) {
-        return null;
-    }
+    public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) throws IOException {
 
-    @Override
-    public double parkScooter(String reservationCode, Location newScooterLocation, String username) {
-        return 0;
-    }
+        /*
+         * This section handles the requests for parking a scooter.
+         * The message we are expecting to receive will have:
+         *  + The reservation identification of the scooter: UTF.
+         *  + x coordinate of the new position: Integer.
+         *  + y coordinate of the new position: Integer.
+         *  + The user's username, used to check whether he is authenticated.
+         *
+         *  This operation requires authentication.
+         */
 
-    /* Implement methods, move scooter, park, bounties, login, etc. */
+        // Creating our own byte stream, so we can send it via tagged connection.
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(dataStream);
+
+        dataOutput.writeInt(2); // Writing the operation we want to use.
+
+        dataOutput.writeUTF(reservationCode); // Writing the range of search.
+        dataOutput.writeInt(newScooterLocation.x()); // Writing the x of the new position.
+        dataOutput.writeInt(newScooterLocation.y()); // Writing the y of the new position.
+        dataOutput.writeUTF(username); // Writing the username for authentication.
+
+        connection.send(0, dataStream.toByteArray()); // Sending the message to the server.
+
+        // Receiving the response from the server as a frame.
+        TaggedConnection.Frame frame = connection.receive();
+
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(frame.data);
+        DataInput response = new DataInputStream(responseStream);
+
+        /*
+         * The response code can be:
+         *   0 - Normal behaviour;
+         *   1 - Reservation ID is not valid;
+         *   2 - User is not logged in.
+         *   3 - Packet includes a bounty price.
+         */
+        int responseCode = response.readInt();
+
+        if (responseCode == 1) return new GenericPair<>(-1d, null);
+
+        else if (responseCode == 2) return new GenericPair<>(-2d, null);
+
+        else {
+
+            double priceToPay = response.readDouble();
+            Double bounty = null;
+
+            if (responseCode == 3) bounty = response.readDouble();
+            return new GenericPair<>(priceToPay, bounty);
+        }
+    }
 }

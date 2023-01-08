@@ -35,7 +35,6 @@ public class RMIServer {
         this.serverPort = serverPort;
 
         try {
-
             // Create server socket on the specified port.
             this.socket = new ServerSocket(serverPort);
 
@@ -82,9 +81,7 @@ public class RMIServer {
             } catch (IOException e) {
                 System.out.println(e.getMessage());
             }
-
         }
-
     }
 
     public static void main(String[] args) throws Exception {

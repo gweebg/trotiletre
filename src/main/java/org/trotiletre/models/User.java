@@ -12,7 +12,7 @@ public class User {
 
     private String username; // 'username' acts as the identification of a user.
     private String passwordHash; // Hashed password with the algoritm Argon2.
-    private Double balance = 0.0d; // User balance.
+    private Double balance = 100.0d; // User balance.
     private Double distanceTraveled = 0.0d; // Distance that the user has travelled.
     private int amountRides = 0; // Amount of rides user has taken.
 

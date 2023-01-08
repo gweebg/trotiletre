@@ -57,4 +57,14 @@ public class AuthenticationManager implements IAuthenticationManager {
 
     }
 
+    public User getUser(String username) {
+
+        try {
+
+            authLock.lock();
+            return accounts.get(username);
+
+        } finally { authLock.unlock(); }
+    }
+
 }

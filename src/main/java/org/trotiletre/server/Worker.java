@@ -30,9 +30,7 @@ public class Worker implements Runnable {
         try {
 
             while (true) {
-
                 TaggedConnection.Frame receivedMessage = connection.receive();
-
                 Skeleton service = services.get(receivedMessage.tag);
                 service.handle(receivedMessage.data, connection);
             }

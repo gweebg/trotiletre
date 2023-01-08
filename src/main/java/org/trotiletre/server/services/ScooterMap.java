@@ -21,7 +21,6 @@ public class ScooterMap {
      */
 
     private List<Scooter>[][] map;
-    private int totalScooters;
     private final int startingScooters;
 
     private ReentrantLock mapLock = new ReentrantLock();
@@ -37,7 +36,6 @@ public class ScooterMap {
             }
         }
 
-        this.totalScooters = 0;
         this.startingScooters = startingScooters;
     }
 
@@ -60,29 +58,33 @@ public class ScooterMap {
 
                 // Place a value at the random location.
                 map[row][col].add(new Scooter(scooterID, new Location(col, row), false));
-                totalScooters++; // Incrementing the total count of scooters.
             }
+
+            show();
         } finally {
           mapLock.unlock();
         }
+
     }
 
-    public Scooter getClosestScooterWithinRange(int range, Location startingPoint) {
+    public Scooter getClosestScooterWithinRange(int range, Location startingPoint, int size) {
 
         try {
 
             mapLock.lock();
 
-            int closestScooterDistance = 100_000;
+            int closestScooterDistance = size + 1;
             Scooter closestScooter = null;
 
             for (int i = 0; i < map.length; i++) {
+
                 for (int j = 0; j < map[i].length; j++) {
 
                     List<Scooter> scootersInLocation = map[i][j];
                     int distance = distanceBetween(new Location(j,i), startingPoint);
 
-                    if (distance < range && distance < closestScooterDistance) {
+                    if (distance <= range && distance <= closestScooterDistance) {
+
                         for (Scooter s : scootersInLocation) {
                             if (!s.isInUse()) {
                                 closestScooter = s;
@@ -114,11 +116,13 @@ public class ScooterMap {
                 for (int j = 0; j < map[i].length; j++) {
 
                     List<Scooter> scootersInLocation = map[i][j];
-                    int distance = distanceBetween(new Location(j,i), startingPoint);
+                    int distance = distanceBetween(startingPoint, new Location(j,i));
 
-                    for (Scooter s: scootersInLocation) {
-                        if (distance < range && !s.isInUse()) {
-                            results.add(s);
+                    if (distance <= range) {
+                        for (Scooter s: scootersInLocation) {
+                            if (!s.isInUse()) {
+                                results.add(s);
+                            }
                         }
                     }
                 }
@@ -157,7 +161,27 @@ public class ScooterMap {
             // If a scooter is found with the specified ID, update its location to the new location.
             if (s.getScooterId().equals(scooterId)) {
                 s.setLocation(b);
+                map[b.y()][b.x()].add(s);
+                map[a.y()][a.x()].remove(s);
+                show();
+                return; // For some reason if this return; is removed the code breaks ?
             }
+        }
+    }
+
+    /**
+     * This method prints the current location of all scooters in the map.
+     * Each scooter's location is represented by a string, and the map is
+     * printed as a matrix of strings.
+     */
+    private void show() {
+
+        for (List<Scooter>[] lists : map) {
+            for (List<Scooter> list : lists) {
+                for (Scooter s : list) System.out.print(s.getLocation().toString() + " ");
+                System.out.print(" | ");
+            }
+            System.out.print("\n");
         }
     }
 }
