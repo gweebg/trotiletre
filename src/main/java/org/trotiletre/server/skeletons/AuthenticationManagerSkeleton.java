@@ -3,16 +3,8 @@ package org.trotiletre.server.skeletons;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
-import org.trotiletre.server.services.ScooterManager;
 
-import javax.swing.text.html.HTML;
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A class that implements the {@link Skeleton} interface for the {@link AuthenticationManager} class.
@@ -31,7 +23,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
     public AuthenticationManagerSkeleton(AuthenticationManager auth) { this.auth = auth; }
 
     @Override
-    public void handle(byte[] data) throws Exception {
+    public void handle(byte[] data, TaggedConnection connection) throws Exception {
 
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
         DataInput payload = new DataInputStream(dataStream);

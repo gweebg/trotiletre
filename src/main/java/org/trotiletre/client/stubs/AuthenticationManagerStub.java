@@ -10,7 +10,7 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
 
     private TaggedConnection connection;
 
-    public AuthenticationManagerStub(TaggedConnection connection, DataOutputStream out) {
+    public AuthenticationManagerStub(TaggedConnection connection) {
         this.connection = connection;
     }
 

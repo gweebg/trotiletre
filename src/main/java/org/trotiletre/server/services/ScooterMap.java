@@ -67,6 +67,40 @@ public class ScooterMap {
         }
     }
 
+    public Scooter getClosestScooterWithinRange(int range, Location startingPoint) {
+
+        try {
+
+            mapLock.lock();
+
+            int closestScooterDistance = 100_000;
+            Scooter closestScooter = null;
+
+            for (int i = 0; i < map.length; i++) {
+                for (int j = 0; j < map[i].length; j++) {
+
+                    List<Scooter> scootersInLocation = map[i][j];
+                    int distance = distanceBetween(new Location(j,i), startingPoint);
+
+                    if (distance < range && distance < closestScooterDistance) {
+                        for (Scooter s : scootersInLocation) {
+                            if (!s.isInUse()) {
+                                closestScooter = s;
+                                closestScooterDistance = distance;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (closestScooter != null) closestScooter.setInUse(true);
+            return closestScooter;
+
+        } finally {
+            mapLock.unlock();
+        }
+    }
+
     public ArrayList<Scooter> getFreeScootersWithinRange(int range, Location startingPoint) {
 
         try {
@@ -80,10 +114,9 @@ public class ScooterMap {
                 for (int j = 0; j < map[i].length; j++) {
 
                     List<Scooter> scootersInLocation = map[i][j];
+                    int distance = distanceBetween(new Location(j,i), startingPoint);
 
                     for (Scooter s: scootersInLocation) {
-
-                        int distance = distanceBetween(new Location(j,i), startingPoint);
                         if (distance < range && !s.isInUse()) {
                             results.add(s);
                         }
@@ -98,13 +131,33 @@ public class ScooterMap {
         }
     }
 
-    private int distanceBetween(@NotNull Location a, @NotNull Location b) {
-
-        /*
-        The Manhattan distance between two points (ax, ay) and (bx, by) is given by
-        the formula |ax - bx| + |ay - by|.
-        */
+    /**
+     * Calculates the distance between to points ({@link Location}), using
+     * the Manhattan distance: {@code |ax - bx| + |ay - by|}.
+     * @param a First location.
+     * @param b Second location.
+     * @return Distance between the points.
+     */
+    public int distanceBetween(@NotNull Location a, @NotNull Location b) {
 
         return Math.abs(a.x() - b.x()) + Math.abs(a.y() - b.y());
+    }
+
+    /**
+     * Updates the location of a scooter in the scooter map.
+     *
+     * @param a The old location of the scooter.
+     * @param b The new location of the scooter.
+     * @param scooterId The identification of the scooter to update.
+     */
+    public void updateScooterLocation(Location a, Location b, String scooterId) {
+
+        // Iterate through the scooters at the old location.
+        for (Scooter s : map[a.y()][a.x()]) {
+            // If a scooter is found with the specified ID, update its location to the new location.
+            if (s.getScooterId().equals(scooterId)) {
+                s.setLocation(b);
+            }
+        }
     }
 }

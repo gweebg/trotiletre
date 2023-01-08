@@ -1,6 +1,7 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
+import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
@@ -63,7 +64,6 @@ public class RMIServer {
 
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
-
 
         // Register service skeletons.
         AuthenticationManager authenticationManager = new AuthenticationManager();

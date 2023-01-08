@@ -7,6 +7,11 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Map;
 
+/**
+ * Class representing a worker that processes incoming requests from a client.
+ * This worker is created for each new connection and runs in a separate thread.
+ * The worker processes requests until the connection is closed.
+ */
 public class Worker implements Runnable {
 
     private Socket socket;
@@ -24,14 +29,12 @@ public class Worker implements Runnable {
 
         try {
 
-            DataInputStream in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-
             while (true) {
 
                 TaggedConnection.Frame receivedMessage = connection.receive();
 
                 Skeleton service = services.get(receivedMessage.tag);
-                service.handle(receivedMessage.data);
+                service.handle(receivedMessage.data, connection);
             }
 
         } catch (Exception e) {
