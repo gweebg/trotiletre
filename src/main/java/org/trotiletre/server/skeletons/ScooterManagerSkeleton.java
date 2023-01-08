@@ -2,7 +2,9 @@ package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
+import org.trotiletre.server.RewardThread;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
 
 import java.io.DataInputStream;
@@ -16,13 +18,19 @@ import java.io.DataOutputStream;
 public class ScooterManagerSkeleton implements Skeleton {
 
     private final ScooterManager server; // The server instance to delegate to.
+    private final ResponseManager responseManager;
+    private final RewardThread rewardThread;
 
     /**
      * Constructs a new skeleton implementation for the given server instance.
      *
      * @param server The server instance.
      */
-    public ScooterManagerSkeleton(ScooterManager server) { this.server = server; }
+    public ScooterManagerSkeleton(ScooterManager server, ResponseManager responseManager, RewardThread rewardThread) {
+        this.server = server;
+        this.responseManager = responseManager;
+        this.rewardThread = rewardThread;
+    }
 
     @Override
     public void handle(byte[] data) throws Exception {

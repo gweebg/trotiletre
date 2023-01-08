@@ -1,10 +1,12 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
+import org.trotiletre.server.skeletons.ManagerSkeletonTags;
+import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
 import java.io.*;
@@ -62,10 +64,19 @@ public class RMIServer {
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
 
+
         // Register service skeletons.
-        services.put(1, new AuthenticationManagerSkeleton(new AuthenticationManager()));
-        services.put(0, new ScooterManagerSkeleton(new ScooterManager(...)));
-        //services.put(2, new NotificationManagerSkeleton(new NotificationManager()));
+        AuthenticationManager authenticationManager = new AuthenticationManager();
+        ScooterManager scooterManager = new ScooterManager(authenticationManager);
+        ResponseManager responseManager = new ResponseManager();
+        RewardThread rewardThread = new RewardThread(responseManager, scooterManager);
+
+        new Thread(rewardThread).start();
+
+        services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager));
+        services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardThread));
+        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(responseManager));
+
 
         // Listen for incoming connections.
         while (true) {
