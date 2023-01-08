@@ -1,5 +1,7 @@
 package org.trotiletre.server;
 
+import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.NotificationManager;
 import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
 
@@ -11,12 +13,15 @@ public class RewardThread implements Runnable{
     private final Lock workLock = new ReentrantLock();
     private final Condition workCond = workLock.newCondition();
     private boolean hasWork = false;
-    private final ResponseManager responseManager;
+    private final NotificationManager notificationManager;
     private final ScooterManager scooterManager;
+    private final AuthenticationManager authenticationManager;
 
-    public RewardThread(ResponseManager responseManager, ScooterManager scooterManager){
-        this.responseManager = responseManager;
+    public RewardThread(NotificationManager notificationManager, ScooterManager scooterManager,
+                        AuthenticationManager authenticationManager){
+        this.notificationManager = notificationManager;
         this.scooterManager = scooterManager;
+        this.authenticationManager = authenticationManager;
     }
 
     public void run(){
@@ -34,6 +39,7 @@ public class RewardThread implements Runnable{
             }
 
             // TODO gerar recompensas e enviar notifs
+
         }
     }
 

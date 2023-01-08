@@ -34,13 +34,11 @@ public class Worker implements Runnable {
                 TaggedConnection.Frame receivedMessage = connection.receive();
 
                 Skeleton service = services.get(receivedMessage.tag);
-                service.handle(receivedMessage.data, connection);
+                service.handle(receivedMessage.data, socket.getRemoteSocketAddress());
             }
 
         } catch (Exception e) {
-
             System.out.println("Closed connection with the client.");
-
         } finally {
 
             try {

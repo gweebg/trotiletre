@@ -17,7 +17,7 @@ public class ScooterManagerRCPClient {
 
     public static void main(String[] args) throws IOException {
 
-        Socket clientSocket = new Socket("localhost", 20022);
+        Socket clientSocket = new Socket("localhost", 12345);
         TaggedConnection connection = new TaggedConnection(clientSocket);
 
         ScooterManagerStub scooterManager = new ScooterManagerStub(connection);

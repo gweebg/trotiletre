@@ -1,6 +1,10 @@
 package org.trotiletre.server.services;
 
+import org.trotiletre.common.communication.TaggedConnection;
+
+import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
@@ -12,49 +16,69 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ResponseManager {
 
-    record SenderInfo(String user, Socket socket, BlockingDeque<SenderData> dataQueue){}
-    record SenderData(byte[] data, boolean stop){}
-    private final Map<String, SenderInfo> senderMap = new HashMap<>();
+    static class SenderInfo{
+        public final SocketAddress address;
+        public int users;
+        public final BlockingDeque<SenderData> dataQueue;
+
+        public SenderInfo(SocketAddress address, BlockingDeque<SenderData> dataQueue){
+            this.address = address;
+            this.dataQueue = dataQueue;
+            this.users = 1;
+        }
+    }
+    record SenderData(byte[] data, int tag, boolean stop){}
+    private final Map<SocketAddress, SenderInfo> senderMap = new HashMap<>();
     private final Lock mapLock = new ReentrantLock();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
 
-    public void registerUser(String user, Socket socket){
+    public void register(Socket socket){
         mapLock.lock();
         try{
-            if(!this.senderMap.containsKey(user)){
-                SenderInfo sdata = new SenderInfo(user, socket, new LinkedBlockingDeque<>());
-                this.senderMap.put(user, sdata);
-                this.executorService.execute(new RespondingThread(sdata));
+            SocketAddress socketAddress = socket.getRemoteSocketAddress();
+            if(!this.senderMap.containsKey(socketAddress)){
+                SenderInfo sdata = new SenderInfo(socketAddress, new LinkedBlockingDeque<>());
+                this.senderMap.put(socketAddress, sdata);
+                this.executorService.execute(new RespondingThread(sdata.dataQueue, socket));
             }
-        }
-        finally {
+            else{
+                SenderInfo sdata = this.senderMap.get(socketAddress);
+                sdata.users+=1;
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
             mapLock.unlock();
         }
     }
 
-    public void send(String user, byte[] data){
+    public void send(SocketAddress socketAddress, byte[] data, int tag){
         mapLock.lock();
         try {
-            SenderInfo senderInfo = this.senderMap.get(user);
+            SenderInfo senderInfo = this.senderMap.get(socketAddress);
             if(senderInfo==null)
                 return;
 
-            senderInfo.dataQueue.add(new SenderData(data, false));
+            senderInfo.dataQueue.add(new SenderData(data, tag, false));
         }
         finally {
             mapLock.unlock();
         }
     }
 
-    public void remove(String user){
+    public void remove(SocketAddress socketAddress){
         mapLock.lock();
         try{
-            if(!this.senderMap.containsKey(user))
+            if(!this.senderMap.containsKey(socketAddress))
                 return;
 
-            this.senderMap.get(user).dataQueue.add(new SenderData(null, true));
-            this.senderMap.remove(user);
+            SenderInfo senderInfo = this.senderMap.get(socketAddress);
+            senderInfo.users--;
+            if(senderInfo.users==0){
+                senderInfo.dataQueue.add(new SenderData(null, -1, true));
+                this.senderMap.remove(socketAddress);
+            }
         }
         finally {
             mapLock.unlock();
@@ -64,13 +88,32 @@ public class ResponseManager {
 
 class RespondingThread implements Runnable{
 
-    private final ResponseManager.SenderInfo senderInfo;
-    public RespondingThread(ResponseManager.SenderInfo senderInfo){
-        this.senderInfo = senderInfo;
+    private final BlockingDeque<ResponseManager.SenderData> dataQueue;
+    private final TaggedConnection taggedConnection;
+    public RespondingThread(BlockingDeque<ResponseManager.SenderData> dataQueue, Socket socket) throws IOException {
+        this.dataQueue = dataQueue;
+        this.taggedConnection = new TaggedConnection(socket);
     }
 
     @Override
-    public void run() { // TODO
+    public void run() {
+        while(true){
+            ResponseManager.SenderData senderData;
+            try{
+                senderData = this.dataQueue.take();
+            } catch (InterruptedException e){
+                e.printStackTrace();
+                return;
+            }
+            if(senderData.stop())
+                return;
+
+            try {
+                this.taggedConnection.send(senderData.tag(), senderData.data());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
     }
 }

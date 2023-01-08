@@ -1,17 +1,21 @@
 package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.communication.Skeleton;
+import org.trotiletre.common.communication.TaggedConnection;
+import org.trotiletre.server.services.NotificationManager;
 import org.trotiletre.server.services.ResponseManager;
 
-public class NotificationManagerSkeleton implements Skeleton {
-    private ResponseManager responseManager;
+import java.net.SocketAddress;
 
-    public NotificationManagerSkeleton(ResponseManager responseManager){
-        this.responseManager = responseManager;
+public class NotificationManagerSkeleton implements Skeleton {
+    private NotificationManager notificationManager;
+
+    public NotificationManagerSkeleton(NotificationManager notificationManager){
+        this.notificationManager = notificationManager;
     }
 
     @Override
-    public void handle(byte[] receivedData) throws Exception {
-
+    public void handle(byte[] receivedData, SocketAddress socketAddress) throws Exception {
+        // TODO
     }
 }

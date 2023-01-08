@@ -1,12 +1,12 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.NotificationManager;
 import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
-import org.trotiletre.server.skeletons.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerSkeletonTags;
 import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
@@ -69,13 +69,15 @@ public class RMIServer {
         AuthenticationManager authenticationManager = new AuthenticationManager();
         ScooterManager scooterManager = new ScooterManager(authenticationManager);
         ResponseManager responseManager = new ResponseManager();
-        RewardThread rewardThread = new RewardThread(responseManager, scooterManager);
+        NotificationManager notificationManager = new NotificationManager(responseManager);
+
+        RewardThread rewardThread = new RewardThread(notificationManager, scooterManager, authenticationManager);
 
         new Thread(rewardThread).start();
 
         services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager));
         services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardThread));
-        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(responseManager));
+        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager));
 
 
         // Listen for incoming connections.
@@ -84,6 +86,7 @@ public class RMIServer {
             try {
 
                 Socket s = socket.accept();
+                responseManager.register(s);
                 Worker worker = new Worker(s, services);
                 new Thread(worker).start();
 

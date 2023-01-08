@@ -5,6 +5,7 @@ import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
 
 import java.io.*;
+import java.net.SocketAddress;
 
 /**
  * A class that implements the {@link Skeleton} interface for the {@link AuthenticationManager} class.
@@ -23,7 +24,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
     public AuthenticationManagerSkeleton(AuthenticationManager auth) { this.auth = auth; }
 
     @Override
-    public void handle(byte[] data, TaggedConnection connection) throws Exception {
+    public void handle(byte[] data, SocketAddress socketAddress) throws Exception {
 
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
         DataInput payload = new DataInputStream(dataStream);

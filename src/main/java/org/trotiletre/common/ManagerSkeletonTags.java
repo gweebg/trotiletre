@@ -1,4 +1,4 @@
-package org.trotiletre.server.skeletons;
+package org.trotiletre.common;
 
 public enum ManagerSkeletonTags {
     SCOOTER(0), AUTHENTICATION(1), NOTIFICATION(2);

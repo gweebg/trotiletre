@@ -1,7 +1,9 @@
 package org.trotiletre;
 
+import org.trotiletre.server.RMIServer;
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
+    public static void main(String[] args) throws Exception {
+        new RMIServer(12345).runServer();
     }
 }

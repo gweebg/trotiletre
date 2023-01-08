@@ -1,5 +1,6 @@
 package org.trotiletre.server.skeletons;
 
+import org.trotiletre.common.ManagerSkeletonTags;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.RewardThread;
@@ -11,6 +12,7 @@ import org.trotiletre.server.services.ScooterManager;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -36,7 +38,7 @@ public class ScooterManagerSkeleton implements Skeleton {
     }
 
     @Override
-    public void handle(byte[] data, TaggedConnection connection) throws Exception {
+    public void handle(byte[] data, SocketAddress socketAddress) throws Exception {
 
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
         DataInput payload = new DataInputStream(dataStream);
@@ -57,7 +59,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             System.out.println("Scooters: " + listedScooters);
 
-            connection.send(0, listedScooters.getBytes());
+            this.responseManager.send(socketAddress, listedScooters.getBytes(), ManagerSkeletonTags.AUTHENTICATION.tag);
         }
 
     }
