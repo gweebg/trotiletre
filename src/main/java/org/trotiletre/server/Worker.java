@@ -2,6 +2,7 @@ package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
+import org.trotiletre.server.services.ResponseManager;
 
 import java.io.*;
 import java.net.Socket;
@@ -17,11 +18,14 @@ public class Worker implements Runnable {
     private Socket socket;
     private TaggedConnection connection;
     private Map<Integer, Skeleton> services;
+    private final ResponseManager responseManager;
 
-    public Worker(Socket socket, Map<Integer, Skeleton> services) throws IOException {
+    public Worker(Socket socket, Map<Integer, Skeleton> services, ResponseManager responseManager) throws IOException {
         this.socket = socket;
         this.services = services;
         this.connection = new TaggedConnection(socket);
+        this.responseManager = responseManager;
+        this.responseManager.register(socket);
     }
 
     @Override
@@ -39,6 +43,7 @@ public class Worker implements Runnable {
 
         } catch (Exception e) {
             System.out.println("Closed connection with the client.");
+            this.responseManager.remove(socket.getRemoteSocketAddress());
         } finally {
 
             try {

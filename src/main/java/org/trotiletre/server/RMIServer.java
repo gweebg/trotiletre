@@ -86,8 +86,7 @@ public class RMIServer {
             try {
 
                 Socket s = socket.accept();
-                responseManager.register(s);
-                Worker worker = new Worker(s, services);
+                Worker worker = new Worker(s, services, responseManager);
                 new Thread(worker).start();
 
             } catch (IOException e) {
