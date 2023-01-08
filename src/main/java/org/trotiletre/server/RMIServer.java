@@ -63,8 +63,8 @@ public class RMIServer {
         Map<Integer, Skeleton> services = new HashMap<>();
 
         // Register service skeletons.
-        services.put(0, new ScooterManagerSkeleton(new ScooterManager()));
         services.put(1, new AuthenticationManagerSkeleton(new AuthenticationManager()));
+        services.put(0, new ScooterManagerSkeleton(new ScooterManager(...)));
         //services.put(2, new NotificationManagerSkeleton(new NotificationManager()));
 
         // Listen for incoming connections.

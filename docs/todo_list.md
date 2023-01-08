@@ -16,5 +16,5 @@ Status:
 
 ✅ - Creation of base model classes.
 
-⌛ - Design communication architecture.
+✅ - Design communication architecture.
 

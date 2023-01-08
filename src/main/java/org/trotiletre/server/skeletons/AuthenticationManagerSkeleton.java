@@ -62,4 +62,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
 
     }
 
+    public AuthenticationManager getAuth() {
+        return auth;
+    }
 }

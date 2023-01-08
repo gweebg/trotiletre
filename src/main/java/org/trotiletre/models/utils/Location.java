@@ -5,4 +5,11 @@ package org.trotiletre.models.utils;
  * <p>
  * This record stores the x and y coordinates of the location.
  */
-public record Location(int x, int y) {}
+public record Location(int x, int y) {
+
+    @Override
+    public String toString() {
+        return "("+ x + "," + y + ")";
+    }
+
+}
