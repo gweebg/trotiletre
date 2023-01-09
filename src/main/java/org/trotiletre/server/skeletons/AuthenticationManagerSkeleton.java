@@ -3,6 +3,7 @@ package org.trotiletre.server.skeletons;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ResponseManager;
 
 import java.io.*;
 import java.net.SocketAddress;
@@ -15,13 +16,17 @@ import java.net.SocketAddress;
 public class AuthenticationManagerSkeleton implements Skeleton {
 
     private final AuthenticationManager auth; // The auth instance to delegate to.
+    private final ResponseManager responseManager;
 
     /**
      * Constructs a new skeleton implementation for the given auth instance.
      *
      * @param auth The auth service instance.
      */
-    public AuthenticationManagerSkeleton(AuthenticationManager auth) { this.auth = auth; }
+    public AuthenticationManagerSkeleton(AuthenticationManager auth, ResponseManager responseManager) {
+        this.auth = auth;
+        this.responseManager = responseManager;
+    }
 
     @Override
     public void handle(byte[] data, SocketAddress socketAddress) throws Exception {
@@ -50,6 +55,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             var passwordHash = payload.readUTF();
 
             auth.loginUser(username, passwordHash);
+            responseManager.registerUser(username, socketAddress);
             System.out.println("Logged in user: " + username);
         }
 

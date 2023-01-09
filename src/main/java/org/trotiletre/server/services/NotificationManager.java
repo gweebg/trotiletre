@@ -12,7 +12,6 @@ public class NotificationManager implements INotificationManager {
     private final Map<String, Set<LocationData>> userMap = new HashMap<>();
     private final Lock lock = new ReentrantLock();
 
-
     public void register(String user){
         lock.lock();
         try{

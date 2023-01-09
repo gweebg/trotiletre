@@ -76,7 +76,7 @@ public class RMIServer {
 
         new Thread(rewardThread).start();
 
-        services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager));
+        services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager, responseManager));
         services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardThread));
         services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager, responseManager));
 

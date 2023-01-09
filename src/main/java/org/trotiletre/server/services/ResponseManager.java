@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
@@ -16,19 +17,21 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ResponseManager {
 
-    static class SenderInfo{
+    private static class SenderInfo{
         public final SocketAddress address;
-        public int users;
+        public int resourceUsers;
         public final BlockingDeque<SenderData> dataQueue;
 
         public SenderInfo(SocketAddress address, BlockingDeque<SenderData> dataQueue){
             this.address = address;
             this.dataQueue = dataQueue;
-            this.users = 1;
+            this.resourceUsers = 1;
         }
     }
-    record SenderData(byte[] data, int tag, boolean stop){}
+    protected record SenderData(byte[] data, int tag, boolean stop){}
     private final Map<SocketAddress, SenderInfo> senderMap = new HashMap<>();
+    private final Map<String, SocketAddress> userMap = new HashMap<>();
+    private final Map<SocketAddress, List<String>> socketMap = new HashMap<>();
     private final Lock mapLock = new ReentrantLock();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -44,10 +47,28 @@ public class ResponseManager {
             }
             else{
                 SenderInfo sdata = this.senderMap.get(socketAddress);
-                sdata.users+=1;
+                sdata.resourceUsers +=1;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            mapLock.unlock();
+        }
+    }
+
+    public void registerUser(String user, SocketAddress socketAddress){
+        mapLock.lock();
+        try {
+            if(!this.senderMap.containsKey(socketAddress) || this.userMap.containsKey(user))
+                return;
+
+            this.userMap.put(user, socketAddress);
+            List<String> userList = this.socketMap.get(socketAddress);
+            if(userList==null)
+                this.socketMap.put(socketAddress, List.of(user));
+            else
+                userList.add(user);
+
         } finally {
             mapLock.unlock();
         }
@@ -67,6 +88,19 @@ public class ResponseManager {
         }
     }
 
+    public void send(String user, byte[] data, int tag){
+        mapLock.lock();
+        try {
+            SocketAddress socketAddress = this.userMap.get(user);
+            if(socketAddress==null)
+                return;
+
+            this.send(socketAddress, data, tag);
+        } finally {
+            mapLock.unlock();
+        }
+    }
+
     public void remove(SocketAddress socketAddress){
         mapLock.lock();
         try{
@@ -74,16 +108,21 @@ public class ResponseManager {
                 return;
 
             SenderInfo senderInfo = this.senderMap.get(socketAddress);
-            senderInfo.users--;
-            if(senderInfo.users==0){
+            senderInfo.resourceUsers--;
+            if(senderInfo.resourceUsers ==0){
                 senderInfo.dataQueue.add(new SenderData(null, -1, true));
                 this.senderMap.remove(socketAddress);
+                List<String> userList = this.socketMap.remove(socketAddress);
+                for(String user : userList){
+                    this.userMap.remove(user);
+                }
             }
         }
         finally {
             mapLock.unlock();
         }
     }
+
 }
 
 class RespondingThread implements Runnable{
