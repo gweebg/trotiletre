@@ -71,13 +71,11 @@ public class RMIServer {
         ResponseManager responseManager = new ResponseManager();
         NotificationManager notificationManager = new NotificationManager();
 
-        RewardThread rewardThread = new RewardThread(responseManager, notificationManager, scooterManager,
+        RewardManager rewardManager = new RewardManager(responseManager, notificationManager, scooterManager,
                 authenticationManager, 2);
 
-        new Thread(rewardThread).start();
-
         services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager, responseManager));
-        services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardThread));
+        services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardManager));
         services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager, responseManager));
 
 

@@ -16,13 +16,13 @@ public class ScooterManager {
     private static final int startingScooters = 50; // Number of starting scooters on the map.
 
     // Logic variables used on the application.
-    private AuthenticationManager authManager; // Authentication manager, used to check user status.
-    private ScooterMap map; // Map containing the scooters.
-    private Map<UUID, Scooter> mapReservationsUUID = new HashMap<>(); // Reservations made by the users.
-    private Map<String, List<UUID>> mapUserUUID = new HashMap<>(); // Users with the reservations.
+    private final AuthenticationManager authManager; // Authentication manager, used to check user status.
+    private final ScooterMap map; // Map containing the scooters.
+    private final Map<UUID, Scooter> mapReservationsUUID = new HashMap<>(); // Reservations made by the users.
+    private final Map<String, List<UUID>> mapUserUUID = new HashMap<>(); // Users with the reservations.
 
     // Concurrency control variables.
-    private ReentrantLock managerLock = new ReentrantLock();
+    private final ReentrantLock managerLock = new ReentrantLock();
 
     /**
      * Creates a new scooter manager using the given authentication manager.
@@ -37,6 +37,10 @@ public class ScooterManager {
         // Create a new scooter map with the specified size and starting number of scooters.
         this.map = new ScooterMap(ScooterManager.mapSize, ScooterManager.startingScooters);
         map.populateMap(); // Populate the map with scooters.
+    }
+
+    public ScooterMap getScooterMap(){
+        return this.map;
     }
 
     /**

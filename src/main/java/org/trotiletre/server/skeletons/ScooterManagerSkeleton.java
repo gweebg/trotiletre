@@ -2,9 +2,7 @@ package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.ManagerSkeletonTags;
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
-import org.trotiletre.server.RewardThread;
-import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.RewardManager;
 import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.models.utils.Location;
 import org.trotiletre.server.services.ScooterManager;
@@ -13,7 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 
 /**
  * A class that implements the {@link Skeleton} interface for the {@link ScooterManager} class.
@@ -23,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 public class ScooterManagerSkeleton implements Skeleton {
 
     private final ResponseManager responseManager;
-    private final RewardThread rewardThread;
+    private final RewardManager rewardManager;
     private final ScooterManager scooterManager; // The server instance to delegate to.
 
     /**
@@ -31,10 +28,10 @@ public class ScooterManagerSkeleton implements Skeleton {
      *
      * @param server The server instance.
      */
-    public ScooterManagerSkeleton(ScooterManager scooterManager, ResponseManager responseManager, RewardThread rewardThread) {
+    public ScooterManagerSkeleton(ScooterManager scooterManager, ResponseManager responseManager, RewardManager rewardManager) {
         this.scooterManager = scooterManager;
         this.responseManager = responseManager;
-        this.rewardThread = rewardThread;
+        this.rewardManager = rewardManager;
     }
 
     @Override

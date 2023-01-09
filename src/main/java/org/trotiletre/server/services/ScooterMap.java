@@ -4,11 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.trotiletre.models.Scooter;
 import org.trotiletre.models.utils.Location;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ScooterMap {
 
@@ -20,11 +19,11 @@ public class ScooterMap {
      *     + A distância entre dois pontos é medida pela distância de Manhattan.
      */
 
-    private List<Scooter>[][] map;
+    private final List<Scooter>[][] map;
     private int totalScooters;
     private final int startingScooters;
 
-    private ReentrantLock mapLock = new ReentrantLock();
+    private final ReentrantLock mapLock = new ReentrantLock();
 
     public ScooterMap(final int mapSize, final int startingScooters) {
 
@@ -39,6 +38,10 @@ public class ScooterMap {
 
         this.totalScooters = 0;
         this.startingScooters = startingScooters;
+    }
+
+    public int getMapSize(){
+        return this.map.length;
     }
 
     public void populateMap() {
@@ -128,6 +131,91 @@ public class ScooterMap {
 
         } finally {
             mapLock.unlock();
+        }
+    }
+
+    public int getNumberOfScootersAt(int x, int y){
+        this.mapLock.lock();
+        try {
+            return this.map[y][x].size();
+        } finally {
+            this.mapLock.unlock();
+        }
+    }
+
+    public Optional<List<Location>> getSurroundingLocationsIf(Location start, int radius,
+                                                              Function<List<Scooter>, Boolean> function){
+        this.mapLock.lock();
+        try {
+            Optional<List<Location>> locationListOpt = Optional.empty();
+
+            if(this.map[start.y()][start.x()].size()<=1)
+                return locationListOpt;
+
+            List<Location> locationList = new ArrayList<>();
+
+            for(int i=radius;i>-radius;--i){
+                if(i==0)
+                    continue;
+                for(int j=radius;j>-radius;--j){
+                    if(j==0)
+                        continue;
+                    if(!function.apply(this.map[i][j]))
+                        return locationListOpt;
+
+                    locationList.add(new Location(j,i));
+                }
+            }
+            locationListOpt = Optional.of(locationList);
+            return locationListOpt;
+
+        } finally {
+            this.mapLock.unlock();
+        }
+    }
+
+
+    public Map<Location, Set<Location>> getRewardPaths(int emptyRadius){
+        this.mapLock.lock();
+        try {
+            Map<Location, Set<Location>> rewardPaths = new HashMap<>();
+            if(emptyRadius<=0)
+                return rewardPaths;
+
+            Set<Location> startList = new HashSet<>();
+            Set<Location> finishList = new HashSet<>();
+
+            for(int y=0;y<this.map.length;++y){
+                for(int x=0;x<this.map.length;++x){
+                    if(this.map[y][x].size()>1)
+                        startList.add(new Location(x,y));
+                    else if(this.map[y][x].size()==0){
+                        boolean shouldHaveReward=true;
+                        for(int i=emptyRadius;i>-emptyRadius && shouldHaveReward;--i){
+                            int yy=y+i;
+                            if(i==0 || yy<0 || yy>this.map.length)
+                                continue;
+                            for(int j=emptyRadius;j>-emptyRadius && shouldHaveReward;--j){
+                                int xx=x+j;
+                                if(j==0 || xx<0 || xx>this.map.length)
+                                    continue;
+                                if (this.map[yy][xx].size() > 0) {
+                                    shouldHaveReward = false;
+                                }
+                            }
+                        }
+                        if(shouldHaveReward)
+                            finishList.add(new Location(x,y));
+                    }
+                }
+            }
+            for(Location start : startList)
+                rewardPaths.put(start, finishList);
+
+            return rewardPaths;
+
+        } finally {
+            this.mapLock.unlock();
         }
     }
 
