@@ -1,6 +1,7 @@
 package org.trotiletre.client.stubs;
 
 import org.trotiletre.common.IAuthenticationManager;
+import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.User;
 
@@ -8,10 +9,13 @@ import java.io.*;
 
 public class AuthenticationManagerStub implements IAuthenticationManager {
 
-    private TaggedConnection connection;
+    private TaggedConnection connection; // The connection to the client.
+    private Demultiplexer demultiplexer; // Application demultiplexer, used to delegate different tags to different threads.
 
-    public AuthenticationManagerStub(TaggedConnection connection) {
+
+    public AuthenticationManagerStub(TaggedConnection connection, Demultiplexer demultiplexer) {
         this.connection = connection;
+        this.demultiplexer = demultiplexer;
     }
 
     /**
@@ -25,7 +29,7 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
      * @throws IOException If an error occurs while sending the request.
      */
     @Override
-    public void registerUser(String username, String password) throws IOException {
+    public boolean registerUser(String username, String password) throws IOException, InterruptedException {
 
         // Creating the user object and hashing the password to be stored.
         User user = new User(username);
@@ -45,6 +49,14 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
 
         connection.send(1, data); // Sending the message to the server.
 
+        // Waiting for a response from the server.
+        byte[] receivedData = demultiplexer.receive(0);
+
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
+        DataInput response = new DataInputStream(responseStream);
+
+        return response.readBoolean();
     }
 
     /**
@@ -58,7 +70,7 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
      * @throws IOException If an error occurs while sending the request.
      */
     @Override
-    public void loginUser(String username, String password) throws IOException {
+    public boolean loginUser(String username, String password) throws IOException, InterruptedException {
 
         // Since the tagged connection takes a byte[] a parameter, we write to a stream
         // and then convert it into the byte[].
@@ -73,7 +85,14 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
         byte[] data = dataStream.toByteArray();
 
         connection.send(1, data); // Sending the message to the server.
+
+        // Waiting for a response from the server.
+        byte[] receivedData = demultiplexer.receive(0);
+
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
+        DataInput response = new DataInputStream(responseStream);
+
+        return response.readBoolean();
     }
-
-
 }

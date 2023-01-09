@@ -1,6 +1,7 @@
 package org.trotiletre.models;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.trotiletre.models.utils.Location;
 
 /**
  * A class that represents a user in the application.
@@ -15,6 +16,7 @@ public class User {
     private Double balance = 100.0d; // User balance.
     private Double distanceTraveled = 0.0d; // Distance that the user has travelled.
     private int amountRides = 0; // Amount of rides user has taken.
+    private boolean notificationsAllowed = false; // Whether push notifications are allowed.
 
     public User(String username, String hashedPassword) {
         this.username = username;

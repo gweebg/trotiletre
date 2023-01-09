@@ -70,6 +70,8 @@ public class ScooterManagerSkeleton implements Skeleton {
                     new Location(locationX, locationY)
             );
 
+            System.out.println("server> Client asked requested for the list of scooters.");
+
             // Sending to the user the obtained results.
             connection.send(0, listedScooters.getBytes());
         }
@@ -96,8 +98,12 @@ public class ScooterManagerSkeleton implements Skeleton {
             int locationY = payload.readInt(); // Y coordinate of the starting position.
             String username = payload.readUTF(); // User's username, for authentication purpouses.
 
+            System.out.println("server> User '" + username + "' requested a scooter.");
+
             /* Before running the task, let's check whether the user is logged in or not. */
             if (!authManager.isUserOnline(username)) {
+
+                System.out.println("server> User '" + username + "' is not logged in.");
                 dataOutput.writeInt(2);
                 connection.send(0, output.toByteArray());
                 return;
@@ -162,12 +168,15 @@ public class ScooterManagerSkeleton implements Skeleton {
             int locationY = payload.readInt(); // Y coordinate of the starting position.
             String username = payload.readUTF(); // User's username, for authentication purpouses.
 
+            System.out.println("server> User '" + username + "' requested to park a scooter.");
+
             /* Before running the task, let's check whether the user is logged in or not. */
             if (!authManager.isUserOnline(username)) {
 
+                System.out.println("server> User '" + username + "' is not logged in.");
+
                 dataOutput.writeInt(2);
                 connection.send(0, output.toByteArray());
-
                 return;
             }
 

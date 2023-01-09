@@ -28,28 +28,37 @@ public class AuthenticationManager implements IAuthenticationManager {
 
     }
 
-    public void registerUser(String username, String passwordHash) {
+    public boolean registerUser(String username, String passwordHash) {
 
         try {
 
             authLock.lock();
 
             User newUser = new User(username, passwordHash);
-            if (!accounts.containsKey(username)) accounts.put(username, newUser);
+            if (!accounts.containsKey(username)) {
+                accounts.put(username, newUser);
+                return true;
+            }
+
+            return false;
 
         } finally {
             authLock.unlock();
         }
     }
 
-    public void loginUser(String username, String password) {
+    public boolean loginUser(String username, String password) {
 
         try {
 
             authLock.lock();
 
             User user = accounts.get(username);
-            if (user != null && user.matchPassword(password)) onlineAccounts.put(username, true);
+            if (user != null && user.matchPassword(password)) {
+                onlineAccounts.put(username, true);
+                return true;
+            }
+            else return false;
 
         } finally {
             authLock.unlock();

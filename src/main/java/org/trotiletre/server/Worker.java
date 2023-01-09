@@ -37,7 +37,7 @@ public class Worker implements Runnable {
 
         } catch (Exception e) {
 
-            System.out.println("Closed connection with the client.");
+            System.out.println("server> Closed connection a client.");
 
         } finally {
 

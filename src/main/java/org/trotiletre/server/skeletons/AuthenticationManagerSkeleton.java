@@ -25,35 +25,93 @@ public class AuthenticationManagerSkeleton implements Skeleton {
     @Override
     public void handle(byte[] data, TaggedConnection connection) throws Exception {
 
+        // Unwrapping the data obtained in 'data' argument.
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
         DataInput payload = new DataInputStream(dataStream);
 
-        int operation = payload.readInt();
+        /*
+         * There are 3 operations on this skeleton, login, register and logout.
+         * Operations:
+         *   0: Register - String, String
+         *   1: LogIn - String, String
+         *   2: LogOut - String
+         */
+        int operation = payload.readInt(); // Reading the operation we want to use.
 
         if (operation == 0) {
 
-            var username = payload.readUTF();
-            var passwordHash = payload.readUTF();
+            /*
+             * This section handles the requests for registering a new user.
+             * The message we are expecting to receive will have:
+             *  + user's username: Integer.
+             *  + user's password hash: Integer.
+             *
+             *  This operation may fail and if so, returns -1.
+             */
 
-            System.out.println("Received username: " + username);
-            System.out.println("Received password: " + passwordHash);
+            var username = payload.readUTF(); // Reading the username.
+            var passwordHash = payload.readUTF(); // Reading the password hash.
 
-            auth.registerUser(username, passwordHash);
+            // Registering the user using the 'API'.
+            boolean registerStatus = auth.registerUser(username, passwordHash);
 
-            System.out.println("Registered user: " + username);
+            // New byte array stream to put our results.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutput dataOutput = new DataOutputStream(output);
+
+            if (registerStatus) {
+                System.out.println("server> Registered new user '" + username + "'.");
+                dataOutput.writeBoolean(true);
+
+            } else {
+                System.out.println("server> Cannot register user '" + username + "' because it already exists.");
+                dataOutput.writeBoolean(false);
+            }
+
+            // Sending to the client.
+            connection.send(0, output.toByteArray());
         }
 
         if (operation == 1) {
 
-            var username = payload.readUTF();
-            var passwordHash = payload.readUTF();
+            /*
+             * This section handles the requests for logging in a user.
+             * The message we are expecting to receive will have:
+             *  + user's username: Integer.
+             *  + user's password: Integer.
+             *
+             *  This operation may fail and if so, returns false.
+             */
 
-            auth.loginUser(username, passwordHash);
-            System.out.println("Logged in user: " + username);
+            var username = payload.readUTF(); // Reading the user username.
+            var passwordHash = payload.readUTF(); // Reading the user's password.
+
+            // Attempting to log in the user.
+            boolean loginStatus = auth.loginUser(username, passwordHash);
+
+            // New byte array stream to put our results.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutput dataOutput = new DataOutputStream(output);
+
+            if (loginStatus) {
+                System.out.println("server> User '" + username + "' has logged in.");
+                dataOutput.writeBoolean(true);
+
+            } else {
+                System.out.println("server> Failed to log in user '" + username + "'.");
+                dataOutput.writeBoolean(false);
+            }
+
+            // Sending to the client.
+            connection.send(0, output.toByteArray());
         }
 
     }
 
+    /**
+     * Getter for the authentication manager.
+     * @return The {@link AuthenticationManager} object.
+     */
     public AuthenticationManager getAuth() {
         return auth;
     }

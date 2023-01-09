@@ -38,8 +38,8 @@ public class Reservation {
         // The price for a trip is based on the distance percurred and its duration.
         // We can say that, price(dist, dur) = dist * 0.10 + duration * 0.20
 
-        Duration durationOfTrip = Duration.between(end, reservationTimestamp);
-        System.out.println(distance + " " + durationOfTrip.toMinutes());
+        Duration durationOfTrip = Duration.between(reservationTimestamp, end);
+        System.out.println(durationOfTrip.toMinutes());
         return distance * 0.1 + durationOfTrip.toMinutes() * 0.2;
     }
 

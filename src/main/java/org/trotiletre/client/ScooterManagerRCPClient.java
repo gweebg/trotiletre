@@ -33,7 +33,7 @@ public class ScooterManagerRCPClient {
         Demultiplexer demultiplexer = new Demultiplexer(connection);
 
         ScooterManagerStub scooterManager = new ScooterManagerStub(connection, demultiplexer);
-        AuthenticationManagerStub authManager = new AuthenticationManagerStub(connection);
+        AuthenticationManagerStub authManager = new AuthenticationManagerStub(connection, demultiplexer);
 
         demultiplexer.start();
 
@@ -44,10 +44,14 @@ public class ScooterManagerRCPClient {
         String username = "Guilherme";
         String password = "emrehliuG";
 
-        authManager.registerUser(username, password);
+        boolean registerStatus = authManager.registerUser(username, password);
+        if (registerStatus) System.out.println("Successfully registered.");
+        else System.out.printf("User already exists.");
         System.in.read();
 
-        authManager.loginUser(username, password);
+        boolean loginStatus = authManager.loginUser(username, password);
+        if (loginStatus) System.out.println("Successfully logged in.");
+        else System.out.printf("Invalid password or username.");
         System.in.read();
 
         String freeScooters = scooterManager.listFreeScooters(

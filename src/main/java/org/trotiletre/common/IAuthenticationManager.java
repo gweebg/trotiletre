@@ -13,8 +13,8 @@ public interface IAuthenticationManager {
      * @param password The password of the new user.
      * @throws IOException If an error occurs while sending the request.
      */
-    public void registerUser(String username, String password) throws IOException;
+    public boolean registerUser(String username, String password) throws IOException, InterruptedException;
 
-    public void loginUser(String username, String password) throws IOException;
+    public boolean loginUser(String username, String password) throws IOException, InterruptedException;
 
 }
