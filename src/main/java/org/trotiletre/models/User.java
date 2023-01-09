@@ -139,4 +139,12 @@ public class User {
     public void setAmountRides(int amountRides) {
         this.amountRides = amountRides;
     }
+
+    public boolean isNotificationsAllowed() {
+        return notificationsAllowed;
+    }
+
+    public void setNotificationsAllowed(boolean notificationsAllowed) {
+        this.notificationsAllowed = notificationsAllowed;
+    }
 }

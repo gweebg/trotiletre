@@ -55,6 +55,9 @@ public class Processor {
 
         operationPatterns.put("logout", Pattern.compile("logout\\s+(\\w+)"));
         operations.put("logout", this.getClass().getMethod("processLogout", String.class));
+
+        operationPatterns.put("notif", Pattern.compile("notif\\s+(\\w+)"));
+        operations.put("notif", this.getClass().getMethod("processNotif", String.class));
     }
 
     public void processLogout(String userCommand) throws IOException, InterruptedException {
@@ -108,19 +111,46 @@ public class Processor {
 
         helpMenu.append("trotiletre.help> 'register [username] [password]' register a new user with the provided parameters\n");
         helpMenu.append("trotiletre.help> 'login [username] [password]' login the user with the provided parameters\n");
+        helpMenu.append("trotiletre.help> 'logout [username]' logout the user provied in the username");
+        helpMenu.append("trotiletre.help> 'status' displays information about the user\n");
+        helpMenu.append("trotiletre.help> 'notif [on/off]' enables or disables push notifications\n");
 
         helpMenu.append("trotiletre.help> 'setlocation [x] [y]' set the user location to (x,y) coordinates\n");
         helpMenu.append("trotiletre.help> 'setrange [range]' set range to search scooters for\n");
 
-        helpMenu.append("trotiletre.help> 'status' displays information about the user\n");
         helpMenu.append("trotiletre.help> 'rent' make a reservation for a scooter within the provided range\n");
         helpMenu.append("trotiletre.help> 'park [reservation_code] [x] [y]' park the scooter indicated by the provided reservation code at (x,y) coordinates.\n");
         helpMenu.append("trotiletre.help> 'list' list available scooters within the range\n");
         helpMenu.append("trotiletre.help> 'listr' list available rewards within the range");
 
-        helpMenu.append("trotiletre.help> 'logout [username]' logout the user provied in the username");
-
         System.out.println(helpMenu);
+    }
+
+    public void processNotif(String userCommand) throws IOException, InterruptedException {
+
+        Pattern parkPattern = operationPatterns.get("notif");
+        Matcher m = parkPattern.matcher(userCommand);
+
+        if (m.find()) {
+
+            String possibleState = m.group(1);
+            boolean state;
+
+            if (possibleState.equals("on")) state = true;
+            else if (possibleState.equals("off")) state = false;
+            else {
+                System.out.println("\"trotiletre.error> Invalid usage of 'notif' command, check the help menu.\"");
+                return;
+            }
+
+            boolean notifState = authManager.changeNotificationStatus(loggedInAs, state);
+
+            if (notifState) System.out.println("trotiletre.info> Changed push notifications to "+ possibleState +".");
+            else System.out.println("trotiletre.error> You need to be logged in to use this action");
+
+        }
+        else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
+
     }
 
     public void processParking(String userCommand) throws IOException, InterruptedException {

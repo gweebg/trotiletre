@@ -119,4 +119,25 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
 
         return response.readBoolean();
     }
+
+    @Override
+    public boolean changeNotificationStatus(String username, boolean state) throws IOException, InterruptedException {
+
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(dataStream);
+
+        dataOutput.writeInt(3); // Writing the operation we want to use.
+        dataOutput.writeUTF(username); // Writing the username, acts as a token.
+        dataOutput.writeBoolean(state); // Writing the state of the notification setting.
+
+        connection.send(1, dataStream.toByteArray());
+
+        byte[] receivedData = demultiplexer.receive(0);
+
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
+        DataInput response = new DataInputStream(responseStream);
+
+        return response.readBoolean();
+
+    }
 }

@@ -138,6 +138,40 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             connection.send(0, output.toByteArray());
         }
 
+        if (operation == 3) {
+
+            /*
+             * This section handles the requests for changing the notication status of the user.
+             * The message we are expecting to receive will have:
+             *  + user's username: Integer.
+             *  + new state: Boolean.
+             *
+             *  This operation may fail and if so, returns false.
+             */
+
+            String username = payload.readUTF(); // Reading the user username.
+            boolean newState = payload.readBoolean(); // Reading the new state for the configuration.
+
+            // Attempting to log in the user.
+            boolean notifStatus = auth.changeNotificationStatus(username, newState);
+
+            // New byte array stream to put our results.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutput dataOutput = new DataOutputStream(output);
+
+            if (notifStatus) {
+                System.out.println("server> User '" + username + "' changed notification");
+                dataOutput.writeBoolean(true);
+
+            } else {
+                System.out.println("server> Failed to change notification setting for user '" + username + "'.");
+                dataOutput.writeBoolean(false);
+            }
+
+            // Sending to the client.
+            connection.send(0, output.toByteArray());
+        }
+
     }
 
     /**

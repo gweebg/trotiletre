@@ -3,6 +3,7 @@ package org.trotiletre.server.services;
 import org.trotiletre.common.IAuthenticationManager;
 import org.trotiletre.models.User;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,8 +49,12 @@ public class AuthenticationManager implements IAuthenticationManager {
 
             authLock.lock();
 
+            if (onlineAccounts.containsKey(username)) {
+                if (onlineAccounts.get(username)) return false;
+            }
+
             User user = accounts.get(username);
-            if (user != null && user.matchPassword(password) && !onlineAccounts.get(username)) {
+            if (user != null && user.matchPassword(password)) {
                 onlineAccounts.put(username, true);
                 return true;
             }
@@ -70,6 +75,23 @@ public class AuthenticationManager implements IAuthenticationManager {
                     onlineAccounts.put(username, false);
                     return true;
                 }
+            }
+            return false;
+
+        } finally { authLock.unlock(); }
+    }
+
+    public boolean changeNotificationStatus(String username, boolean state) throws IOException, InterruptedException {
+
+        try {
+
+            authLock.lock();
+
+            if (accounts.containsKey(username) && onlineAccounts.get(username)) {
+
+                User user = accounts.get(username);
+                user.setNotificationsAllowed(state);
+                return true;
             }
             return false;
 
