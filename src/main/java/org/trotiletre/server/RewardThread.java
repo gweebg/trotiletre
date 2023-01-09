@@ -69,10 +69,10 @@ public class RewardThread implements Runnable{
     }
 
     public List<RewardPath> getRewardPaths(Location start){
-
+        return null;
     }
 
     public List<RewardPath> getRewardPaths(Location start, int radius){
-
+        return null;
     }
 }
