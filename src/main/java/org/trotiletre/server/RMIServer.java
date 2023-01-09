@@ -69,15 +69,16 @@ public class RMIServer {
         AuthenticationManager authenticationManager = new AuthenticationManager();
         ScooterManager scooterManager = new ScooterManager(authenticationManager);
         ResponseManager responseManager = new ResponseManager();
-        NotificationManager notificationManager = new NotificationManager(responseManager);
+        NotificationManager notificationManager = new NotificationManager();
 
-        RewardThread rewardThread = new RewardThread(notificationManager, scooterManager, authenticationManager);
+        RewardThread rewardThread = new RewardThread(responseManager, notificationManager, scooterManager,
+                authenticationManager, 2);
 
         new Thread(rewardThread).start();
 
         services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager));
         services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardThread));
-        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager));
+        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager, responseManager));
 
 
         // Listen for incoming connections.

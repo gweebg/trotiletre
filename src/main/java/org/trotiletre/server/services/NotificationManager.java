@@ -1,63 +1,59 @@
 package org.trotiletre.server.services;
 
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.INotificationManager;
+import org.trotiletre.models.utils.Location;
 
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class NotificationManager {
-    private final Map<String, SocketAddress> userConnMap = new HashMap<>();
+public class NotificationManager implements INotificationManager {
+    public record LocationData(Location location, int radius){}
+    private final Map<String, Set<LocationData>> userMap = new HashMap<>();
     private final Lock lock = new ReentrantLock();
-    private final ResponseManager responseManager;
 
-    public NotificationManager(ResponseManager responseManager){
-        this.responseManager = responseManager;
-    }
 
-    public void register(String user, Socket socket){
+    public void register(String user){
         lock.lock();
         try{
-            this.userConnMap.put(user, socket.getRemoteSocketAddress());
+            if(this.userMap.containsKey(user))
+                return;
+            this.userMap.put(user, new HashSet<>());
+
         }finally {
             lock.unlock();
         }
-        this.responseManager.register(socket);
     }
 
     public boolean isRegistered(String user){
         lock.lock();
         try {
-            return this.userConnMap.containsKey(user);
+            return this.userMap.containsKey(user);
         }finally {
             lock.unlock();
         }
     }
 
-    public void send(String user, byte[] data){
-        SocketAddress socketAddress;
+    public void addLocation(String user, Location location, int radius){
         lock.lock();
         try {
-            socketAddress = this.userConnMap.get(user);
-            if(socketAddress==null)
+            Set<LocationData> locationDataSet = this.userMap.get(user);
+            if(locationDataSet==null)
                 return;
+
+            locationDataSet.add(new LocationData(location, radius));
         } finally {
             lock.unlock();
         }
-        responseManager.send(socketAddress, data, ManagerSkeletonTags.NOTIFICATION.tag);
     }
 
     public void remove(String user){
         lock.lock();
         try{
-            if(!this.userConnMap.containsKey(user))
+            if(!this.userMap.containsKey(user))
                 return;
 
-            this.responseManager.remove(this.userConnMap.remove(user));
+            this.userMap.remove(user);
 
         } finally {
             lock.unlock();
@@ -67,8 +63,21 @@ public class NotificationManager {
     public Set<String> getUserSet(){
         lock.lock();
         try {
-            return this.userConnMap.keySet();
+            return new HashSet<>(this.userMap.keySet());
         }finally {
+            lock.unlock();
+        }
+    }
+
+    public Set<NotificationManager.LocationData> getUserLocationSet(String user){
+        lock.lock();
+        try {
+            Set<LocationData> userLocationDataSet = this.userMap.get(user);
+            if(userLocationDataSet==null)
+                return new HashSet<>();
+
+            return new HashSet<>(userLocationDataSet);
+        } finally {
             lock.unlock();
         }
     }
