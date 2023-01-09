@@ -143,37 +143,6 @@ public class ScooterMap {
         }
     }
 
-    public Optional<List<Location>> getSurroundingLocationsIf(Location start, int radius,
-                                                              Function<List<Scooter>, Boolean> function){
-        this.mapLock.lock();
-        try {
-            Optional<List<Location>> locationListOpt = Optional.empty();
-
-            if(this.map[start.y()][start.x()].size()<=1)
-                return locationListOpt;
-
-            List<Location> locationList = new ArrayList<>();
-
-            for(int i=radius;i>-radius;--i){
-                if(i==0)
-                    continue;
-                for(int j=radius;j>-radius;--j){
-                    if(j==0)
-                        continue;
-                    if(!function.apply(this.map[i][j]))
-                        return locationListOpt;
-
-                    locationList.add(new Location(j,i));
-                }
-            }
-            locationListOpt = Optional.of(locationList);
-            return locationListOpt;
-
-        } finally {
-            this.mapLock.unlock();
-        }
-    }
-
 
     public Map<Location, Set<Location>> getRewardPaths(int emptyRadius){
         this.mapLock.lock();
