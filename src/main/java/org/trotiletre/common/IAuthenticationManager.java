@@ -17,4 +17,6 @@ public interface IAuthenticationManager {
 
     public boolean loginUser(String username, String password) throws IOException, InterruptedException;
 
+    public boolean logoutUser(String username) throws IOException, InterruptedException;
+
 }

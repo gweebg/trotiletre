@@ -1,4 +1,4 @@
-package org.trotiletre.models.utils;
+package org.trotiletre.models;
 
 import org.trotiletre.models.Scooter;
 

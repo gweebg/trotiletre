@@ -22,10 +22,7 @@ public class AuthenticationManager implements IAuthenticationManager {
             authLock.lock();
             return onlineAccounts.getOrDefault(username, false);
 
-        } finally {
-            authLock.unlock();
-        }
-
+        } finally { authLock.unlock(); }
     }
 
     public boolean registerUser(String username, String passwordHash) {
@@ -42,9 +39,7 @@ public class AuthenticationManager implements IAuthenticationManager {
 
             return false;
 
-        } finally {
-            authLock.unlock();
-        }
+        } finally { authLock.unlock(); }
     }
 
     public boolean loginUser(String username, String password) {
@@ -60,10 +55,25 @@ public class AuthenticationManager implements IAuthenticationManager {
             }
             else return false;
 
-        } finally {
-            authLock.unlock();
-        }
+        } finally { authLock.unlock(); }
+    }
 
+    public boolean logoutUser(String username) {
+
+        try {
+
+            authLock.lock();
+
+            if (onlineAccounts.containsKey(username)) {
+
+                if (onlineAccounts.get(username)) {
+                    onlineAccounts.put(username, false);
+                    return true;
+                }
+            }
+            return false;
+
+        } finally { authLock.unlock(); }
     }
 
     public User getUser(String username) {

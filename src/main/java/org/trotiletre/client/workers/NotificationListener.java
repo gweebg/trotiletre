@@ -43,7 +43,7 @@ public class NotificationListener implements Runnable {
                 String locations = new String(notificationData, StandardCharsets.UTF_8);
 
                 // Print the notification message
-                System.out.println("[notificaton] New rewards found: " + locations);
+                System.out.println("trotiletre.notif> New rewards found at: " + locations);
 
             } catch (IOException | InterruptedException e) {
                 // If there is an exception, wrap it in a RuntimeException and throw it.

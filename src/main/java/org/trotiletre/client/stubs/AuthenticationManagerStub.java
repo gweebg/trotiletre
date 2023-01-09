@@ -95,4 +95,28 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
 
         return response.readBoolean();
     }
+
+    @Override
+    public boolean logoutUser(String username) throws IOException, InterruptedException {
+
+        // Since the tagged connection takes a byte[] a parameter, we write to a stream
+        // and then convert it into the byte[].
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(dataStream);
+
+        dataOutput.writeInt(2); // Writing the operation we want to use.
+        dataOutput.writeUTF(username); // Writing the username.
+
+        // Converting the ByteArrayOutputStream into a primitive byte[].
+        connection.send(1, dataStream.toByteArray()); // Sending the message to the server.
+
+        // Waiting for a response from the server.
+        byte[] receivedData = demultiplexer.receive(0);
+
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
+        DataInput response = new DataInputStream(responseStream);
+
+        return response.readBoolean();
+    }
 }

@@ -6,7 +6,7 @@ import org.trotiletre.models.Scooter;
 import org.trotiletre.models.User;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
-import org.trotiletre.models.utils.Reservation;
+import org.trotiletre.models.Reservation;
 
 import java.time.LocalDateTime;
 import java.util.*;

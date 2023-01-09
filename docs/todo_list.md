@@ -28,4 +28,8 @@ Status:
 
 ❌ - Add notifications.
 
-⌛ - Add multithreading to client.
+✅ - Add multithreading to client.
+
+⌛ - Add notification toggle on client.
+
+

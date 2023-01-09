@@ -106,6 +106,38 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             connection.send(0, output.toByteArray());
         }
 
+        if (operation == 2) {
+
+            /*
+             * This section handles the requests for logging out the user.
+             * The message we are expecting to receive will have:
+             *  + user's username: Integer.
+             *
+             *  This operation may fail and if so, returns false.
+             */
+
+            var username = payload.readUTF(); // Reading the user username.
+
+            // Attempting to log in the user.
+            boolean logoutStatus = auth.logoutUser(username);
+
+            // New byte array stream to put our results.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutput dataOutput = new DataOutputStream(output);
+
+            if (logoutStatus) {
+                System.out.println("server> User '" + username + "' has logged out.");
+                dataOutput.writeBoolean(true);
+
+            } else {
+                System.out.println("server> Failed to log out user '" + username + "'.");
+                dataOutput.writeBoolean(false);
+            }
+
+            // Sending to the client.
+            connection.send(0, output.toByteArray());
+        }
+
     }
 
     /**
