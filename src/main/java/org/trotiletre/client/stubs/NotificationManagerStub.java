@@ -1,8 +1,9 @@
 package org.trotiletre.client.stubs;
 
 import org.trotiletre.common.INotificationManager;
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.common.NotificationOperations;
+import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.Location;
 
@@ -10,39 +11,39 @@ import java.io.*;
 
 public class NotificationManagerStub implements INotificationManager {
     private final TaggedConnection connection;
+    private final Demultiplexer demultiplexer;
 
-    public NotificationManagerStub(TaggedConnection connection){
+    public NotificationManagerStub(TaggedConnection connection, Demultiplexer demultiplexer){
         this.connection = connection;
+        this.demultiplexer = demultiplexer;
     }
 
-    public void register(String user) throws IOException {
+    public boolean register(String user) throws IOException, InterruptedException {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(dataStream);
 
+
         dataOutput.writeInt(NotificationOperations.REGISTER.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerSkeletonTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        return dataInput.readBoolean();
     }
 
-    public boolean isRegistered(String user) throws IOException {
+    public boolean isRegistered(String user) throws IOException, InterruptedException {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(dataStream);
 
         dataOutput.writeInt(NotificationOperations.IS_REGISTERED.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerSkeletonTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
 
-        TaggedConnection.Frame frame = connection.receive();
-
-        if(frame.tag!=ManagerSkeletonTags.NOTIFICATION.tag)
-            return false;
-
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(frame.data));
-
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
         return dataInput.readBoolean();
     }
 
-    public void addLocation(String user, Location location, int radius) throws IOException {
+    public boolean addLocation(String user, Location location, int radius) throws IOException, InterruptedException {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(dataStream);
 
@@ -51,14 +52,22 @@ public class NotificationManagerStub implements INotificationManager {
         dataOutput.writeInt(location.x());
         dataOutput.writeInt(location.y());
         dataOutput.writeInt(radius);
+
+        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        return dataInput.readBoolean();
     }
 
-    public void remove(String user) throws IOException {
+    public boolean remove(String user) throws IOException, InterruptedException {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
         DataOutput dataOutput = new DataOutputStream(dataStream);
 
         dataOutput.writeInt(NotificationOperations.REMOVE.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerSkeletonTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        return dataInput.readBoolean();
     }
 }

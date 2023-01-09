@@ -118,6 +118,20 @@ public class ResponseManager {
         }
     }
 
+    public void removeUser(String user){
+        mapLock.lock();
+        try {
+            SocketAddress address = this.userMap.remove(user);
+            if(address==null)
+                return;
+
+            this.socketMap.remove(address);
+
+        } finally {
+            mapLock.unlock();
+        }
+    }
+
 }
 
 class RespondingThread implements Runnable{

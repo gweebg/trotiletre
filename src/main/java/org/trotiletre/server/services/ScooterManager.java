@@ -15,13 +15,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ScooterManager implements IScooterManager {
 
     // Static information about the application.
-    private static final int mapSize = 4; // Size of the rows and collumns of the map.
-    private static final int startingScooters = 4; // Number of starting scooters on the map.
+    private final int mapSize; // Size of the rows and collumns of the map.
 
     // Logic variables used on the application.
-    private AuthenticationManager authManager; // Authentication manager, used to check user status.
-    private ScooterMap map; // Map containing the scooters.
-    private Map<UUID, Reservation> reservation = new HashMap<>(); // Reservations made by the users.
+    private final AuthenticationManager authManager; // Authentication manager, used to check user status.
+    private final RewardManager rewardManager;
+    private final ScooterMap map; // Map containing the scooters.
+    private final Map<UUID, Reservation> reservation = new HashMap<>(); // Reservations made by the users.
 
     // Concurrency control variables.
     private final ReentrantLock managerLock = new ReentrantLock();
@@ -31,13 +31,16 @@ public class ScooterManager implements IScooterManager {
      *
      * @param authManager The authentication manager to use for this scooter manager.
      */
-    public ScooterManager(AuthenticationManager authManager) {
+    public ScooterManager(ScooterMap scooterMap, AuthenticationManager authManager, RewardManager rewardManager) {
 
         // Setting up the authentication manager.
         this.authManager = authManager;
+        this.rewardManager = rewardManager;
 
         // Create a new scooter map with the specified size and starting number of scooters.
-        this.map = new ScooterMap(ScooterManager.mapSize, ScooterManager.startingScooters);
+        this.map = scooterMap;
+        this.mapSize = scooterMap.getMapSize();
+
         map.populateMap(); // Populate the map with scooters.
     }
 
@@ -81,7 +84,7 @@ public class ScooterManager implements IScooterManager {
     public GenericPair<String, Location> reserveScooter(final int range, @NotNull Location local, String username) {
 
         // Get the closest free scooter of the provided location within the specified range.
-        Scooter scooter = map.getClosestScooterWithinRange(range, local, ScooterManager.mapSize); // Scooter already comes marked with being used.
+        Scooter scooter = map.getClosestScooterWithinRange(range, local, mapSize); // Scooter already comes marked with being used.
 
         try {
 
@@ -115,11 +118,6 @@ public class ScooterManager implements IScooterManager {
      */
     public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) {
 
-        /*
-        TODO:
-        Verificar se é recompensa.
-        */
-
         try {
 
             managerLock.lock();
@@ -140,6 +138,12 @@ public class ScooterManager implements IScooterManager {
             // Calculating the price for the trip. The user pays 10 cents per unit of distance and 20 cents per minute.
             double priceToPay = context.getPriceOfTrip(distanceScooted, LocalDateTime.now());
 
+            // Get bounty if exists
+            Optional<Double> rewardOpt = this.rewardManager.getReward(scooter.getLocation(), newScooterLocation);
+            Double reward = null;
+            if(rewardOpt.isPresent())
+                reward = rewardOpt.get();
+
             // Update the location of the scooter to the new location provided.
             map.updateScooterLocation(scooter.getLocation(), newScooterLocation, scooter.getScooterId());
 
@@ -152,7 +156,7 @@ public class ScooterManager implements IScooterManager {
             user.setAmountRides(user.getAmountRides() + 1);
             user.setDistanceTraveled(user.getDistanceTraveled() + (double) distanceScooted);
 
-            return new GenericPair<>(priceToPay, null);
+            return new GenericPair<>(priceToPay, reward);
 
         } finally { managerLock.unlock(); }
     }

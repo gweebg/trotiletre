@@ -1,8 +1,9 @@
 package org.trotiletre.server.skeletons;
 
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.NotificationManager;
 import org.trotiletre.server.services.ResponseManager;
 
 import java.io.*;
@@ -17,15 +18,18 @@ public class AuthenticationManagerSkeleton implements Skeleton {
 
     private final AuthenticationManager auth; // The auth instance to delegate to.
     private final ResponseManager responseManager;
+    private final NotificationManager notificationManager;
 
     /**
      * Constructs a new skeleton implementation for the given auth instance.
      *
      * @param auth The auth service instance.
      */
-    public AuthenticationManagerSkeleton(AuthenticationManager auth, ResponseManager responseManager) {
+    public AuthenticationManagerSkeleton(AuthenticationManager auth, ResponseManager responseManager,
+                                         NotificationManager notificationManager) {
         this.auth = auth;
         this.responseManager = responseManager;
+        this.notificationManager = notificationManager;
     }
 
     @Override
@@ -75,7 +79,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            connection.send(0, output.toByteArray());
+            responseManager.send(socketAddress, output.toByteArray(), ManagerTags.AUTHENTICATION.tag);
         }
 
         if (operation == 1) {
@@ -100,6 +104,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             DataOutput dataOutput = new DataOutputStream(output);
 
             if (loginStatus) {
+                responseManager.registerUser(username, socketAddress);
                 System.out.println("server> User '" + username + "' has logged in.");
                 dataOutput.writeBoolean(true);
 
@@ -109,7 +114,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            connection.send(0, output.toByteArray());
+            responseManager.send(socketAddress, output.toByteArray(), ManagerTags.AUTHENTICATION.tag);
         }
 
         if (operation == 2) {
@@ -132,6 +137,8 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             DataOutput dataOutput = new DataOutputStream(output);
 
             if (logoutStatus) {
+                responseManager.removeUser(username);
+                notificationManager.remove(username);
                 System.out.println("server> User '" + username + "' has logged out.");
                 dataOutput.writeBoolean(true);
 
@@ -139,45 +146,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
                 System.out.println("server> Failed to log out user '" + username + "'.");
                 dataOutput.writeBoolean(false);
             }
-            auth.loginUser(username, passwordHash);
-            responseManager.registerUser(username, socketAddress);
             responseManager.send(socketAddress, output.toByteArray(),0);
-        }
-
-    }
-
-        if (operation == 3) {
-
-            /*
-             * This section handles the requests for changing the notication status of the user.
-             * The message we are expecting to receive will have:
-             *  + user's username: Integer.
-             *  + new state: Boolean.
-             *
-             *  This operation may fail and if so, returns false.
-             */
-
-            String username = payload.readUTF(); // Reading the user username.
-            boolean newState = payload.readBoolean(); // Reading the new state for the configuration.
-
-            // Attempting to log in the user.
-            boolean notifStatus = auth.changeNotificationStatus(username, newState);
-
-            // New byte array stream to put our results.
-            ByteArrayOutputStream output = new ByteArrayOutputStream();
-            DataOutput dataOutput = new DataOutputStream(output);
-
-            if (notifStatus) {
-                System.out.println("server> User '" + username + "' changed notification");
-                dataOutput.writeBoolean(true);
-
-            } else {
-                System.out.println("server> Failed to change notification setting for user '" + username + "'.");
-                dataOutput.writeBoolean(false);
-            }
-
-            // Sending to the client.
-            connection.send(0, output.toByteArray());
         }
 
     }

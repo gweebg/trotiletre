@@ -19,6 +19,4 @@ public interface IAuthenticationManager {
 
     public boolean logoutUser(String username) throws IOException, InterruptedException;
 
-    public boolean changeNotificationStatus(String username, boolean state) throws IOException, InterruptedException;
-
 }

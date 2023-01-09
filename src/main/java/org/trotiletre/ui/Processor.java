@@ -1,6 +1,7 @@
 package org.trotiletre.ui;
 
 import org.trotiletre.client.stubs.AuthenticationManagerStub;
+import org.trotiletre.client.stubs.NotificationManagerStub;
 import org.trotiletre.client.stubs.ScooterManagerStub;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
@@ -19,6 +20,7 @@ public class Processor {
 
     private ScooterManagerStub scooterManager;
     private AuthenticationManagerStub authManager;
+    private final NotificationManagerStub notificationManager;
 
     private Map<String, Pattern> operationPatterns = new HashMap<>();
     private Map<String, Method> operations = new HashMap<>();
@@ -27,10 +29,12 @@ public class Processor {
     private Location currentLocation = new Location(0, 0);
     private String loggedInAs = "";
 
-    public Processor(ScooterManagerStub scooterManager, AuthenticationManagerStub authManager) throws NoSuchMethodException {
+    public Processor(ScooterManagerStub scooterManager, AuthenticationManagerStub authManager,
+                     NotificationManagerStub notificationManager) throws NoSuchMethodException {
 
         this.scooterManager = scooterManager;
         this.authManager = authManager;
+        this.notificationManager = notificationManager;
 
         operations.put("help", this.getClass().getMethod("processHelp", String.class));
 
@@ -58,6 +62,9 @@ public class Processor {
 
         operationPatterns.put("notif", Pattern.compile("notif\\s+(\\w+)"));
         operations.put("notif", this.getClass().getMethod("processNotif", String.class));
+
+        operationPatterns.put("sendNotifLoc", Pattern.compile("sendNotifLoc\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
+        operations.put("sendNotifLoc", this.getClass().getMethod("processSendNotifLoc", String.class));
     }
 
     public void processLogout(String userCommand) throws IOException, InterruptedException {
@@ -114,6 +121,7 @@ public class Processor {
         helpMenu.append("trotiletre.help> 'logout [username]' logout the user provied in the username");
         helpMenu.append("trotiletre.help> 'status' displays information about the user\n");
         helpMenu.append("trotiletre.help> 'notif [on/off]' enables or disables push notifications\n");
+        helpMenu.append("trotiletre.help> 'sendNotifLoc [x] [y] [radius]' add new location to receive notifications\n");
 
         helpMenu.append("trotiletre.help> 'setlocation [x] [y]' set the user location to (x,y) coordinates\n");
         helpMenu.append("trotiletre.help> 'setrange [range]' set range to search scooters for\n");
@@ -142,14 +150,35 @@ public class Processor {
                 System.out.println("\"trotiletre.error> Invalid usage of 'notif' command, check the help menu.\"");
                 return;
             }
-
-            boolean notifState = authManager.changeNotificationStatus(loggedInAs, state);
+            boolean notifState;
+            if(state)
+                notifState = notificationManager.register(loggedInAs);
+            else
+                notifState = notificationManager.remove(loggedInAs);
 
             if (notifState) System.out.println("trotiletre.info> Changed push notifications to "+ possibleState +".");
             else System.out.println("trotiletre.error> You need to be logged in to use this action");
 
         }
         else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
+
+    }
+
+    public void processNotifLoc(String userCommand) throws IOException, InterruptedException {
+        Pattern parkPattern = operationPatterns.get("sendNotifLoc");
+        Matcher m = parkPattern.matcher(userCommand);
+
+        if(m.find()){
+            int xLocation = Integer.parseInt(m.group(1));
+            int yLocation = Integer.parseInt(m.group(2));
+            int radius = Integer.parseInt(m.group(3));
+
+            boolean b = notificationManager.addLocation(loggedInAs, new Location(xLocation, yLocation), radius);
+
+            if(b) System.out.println("trotiletre.info> Added new location to receive notifications");
+            else System.out.println("trotiletre.error> Could not add location");
+        }
+        else System.out.println("trotiletre.error> Invalid usage of 'sendNotifLoc' command, check the help menu.");
 
     }
 

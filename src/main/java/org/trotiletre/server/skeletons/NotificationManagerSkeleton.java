@@ -1,9 +1,8 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.common.NotificationOperations;
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.Location;
 import org.trotiletre.server.services.NotificationManager;
 import org.trotiletre.server.services.ResponseManager;
@@ -32,12 +31,13 @@ public class NotificationManagerSkeleton implements Skeleton {
         switch (op){
             case REGISTER -> {
                 String user = dataInput.readUTF();
-                this.notificationManager.register(user);
+                dataOutput.writeBoolean(this.notificationManager.register(user));
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
             }
             case IS_REGISTERED -> {
                 String user = dataInput.readUTF();
                 dataOutput.writeBoolean(this.notificationManager.isRegistered(user));
-                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerSkeletonTags.NOTIFICATION.tag);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
             }
             case ADD_LOCATION -> {
                 String user = dataInput.readUTF();
@@ -46,11 +46,14 @@ public class NotificationManagerSkeleton implements Skeleton {
                         dataInput.readInt()
                 );
                 int radius = dataInput.readInt();
-                this.notificationManager.addLocation(user, location, radius);
+                boolean b = this.notificationManager.addLocation(user, location, radius);
+                dataOutput.writeBoolean(b);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
             }
             case REMOVE -> {
                 String user = dataInput.readUTF();
-                this.notificationManager.remove(user);
+                dataOutput.writeBoolean(this.notificationManager.remove(user));
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
             }
         }
     }

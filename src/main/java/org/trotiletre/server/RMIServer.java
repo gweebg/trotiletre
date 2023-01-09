@@ -1,12 +1,9 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.server.services.AuthenticationManager;
-import org.trotiletre.server.services.NotificationManager;
-import org.trotiletre.server.services.ResponseManager;
-import org.trotiletre.server.services.ScooterManager;
+import org.trotiletre.server.services.*;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
@@ -61,21 +58,26 @@ public class RMIServer {
 
         System.out.println("Running server...");
 
+        ScooterMap scooterMap = new ScooterMap(4,4);
+
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
 
         // Register service skeletons.
         AuthenticationManager authenticationManager = new AuthenticationManager();
-        ScooterManager scooterManager = new ScooterManager(authenticationManager);
         ResponseManager responseManager = new ResponseManager();
         NotificationManager notificationManager = new NotificationManager();
-
-        RewardManager rewardManager = new RewardManager(responseManager, notificationManager, scooterManager,
+        RewardManager rewardManager = new RewardManager(responseManager, notificationManager, scooterMap,
                 authenticationManager, 2);
+        ScooterManager scooterManager = new ScooterManager(scooterMap, authenticationManager, rewardManager);
 
-        services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager, responseManager));
-        services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardManager));
-        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager, responseManager));
+
+        services.put(ManagerTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager,
+                responseManager, notificationManager));
+        services.put(ManagerTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager,
+                responseManager, rewardManager));
+        services.put(ManagerTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager,
+                responseManager));
 
 
         // Listen for incoming connections.

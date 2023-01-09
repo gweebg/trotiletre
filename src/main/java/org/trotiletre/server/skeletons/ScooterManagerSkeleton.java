@@ -1,10 +1,9 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.GenericPair;
-import org.trotiletre.server.RewardManager;
+import org.trotiletre.server.services.RewardManager;
 import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.models.utils.Location;
 import org.trotiletre.server.services.AuthenticationManager;
@@ -33,10 +32,8 @@ public class ScooterManagerSkeleton implements Skeleton {
      *
      * @param scooterManager The server instance.
      */
-    public ScooterManagerSkeleton(ScooterManager scooterManager) {
-        this.scooterManager = scooterManager;
-        this.authManager = scooterManager.getAuthManager();
     public ScooterManagerSkeleton(ScooterManager scooterManager, ResponseManager responseManager, RewardManager rewardManager) {
+        this.authManager = scooterManager.getAuthManager();
         this.scooterManager = scooterManager;
         this.responseManager = responseManager;
         this.rewardManager = rewardManager;
@@ -86,7 +83,7 @@ public class ScooterManagerSkeleton implements Skeleton {
             System.out.println("server> Client asked requested for the list of scooters.");
 
             // Sending to the user the obtained results.
-            connection.send(0, listedScooters.getBytes());
+            responseManager.send(socketAddress, listedScooters.getBytes(), ManagerTags.SCOOTER.tag);
         }
 
         if (operation == 1) {
@@ -118,7 +115,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
                 System.out.println("server> User '" + username + "' is not logged in.");
                 dataOutput.writeInt(2);
-                connection.send(0, output.toByteArray());
+                responseManager.send(socketAddress, output.toByteArray(), ManagerTags.SCOOTER.tag);
                 return;
             }
 
@@ -152,11 +149,13 @@ public class ScooterManagerSkeleton implements Skeleton {
 
                 dataOutput.writeInt(loc.x()); // Location x coordinate.
                 dataOutput.writeInt(loc.y()); // Location y coordinate.
+
+                rewardManager.signal();
             }
 
             // Packing the data onto a byte[] and sending to the client.
             byte[] responseData = output.toByteArray();
-            connection.send(0, responseData);
+            responseManager.send(socketAddress, responseData, ManagerTags.SCOOTER.tag);
         }
 
         if (operation == 2) {
@@ -189,7 +188,7 @@ public class ScooterManagerSkeleton implements Skeleton {
                 System.out.println("server> User '" + username + "' is not logged in.");
 
                 dataOutput.writeInt(2);
-                connection.send(0, output.toByteArray());
+                responseManager.send(socketAddress, output.toByteArray(), ManagerTags.SCOOTER.tag);
                 return;
             }
 
@@ -199,6 +198,8 @@ public class ScooterManagerSkeleton implements Skeleton {
                     new Location(locationX, locationY),
                     username
             );
+
+            rewardManager.signal();
 
             /*
              * Once again, we need to encapsulate the results obtained and send them to the client.
@@ -233,7 +234,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             // Packing and sending the data to the client.
             byte[] responseData = output.toByteArray();
-            connection.send(0, responseData);
+            responseManager.send(socketAddress, responseData, ManagerTags.SCOOTER.tag);
         }
     }
 

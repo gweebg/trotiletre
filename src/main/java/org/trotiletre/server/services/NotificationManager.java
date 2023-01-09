@@ -12,13 +12,13 @@ public class NotificationManager implements INotificationManager {
     private final Map<String, Set<LocationData>> userMap = new HashMap<>();
     private final Lock lock = new ReentrantLock();
 
-    public void register(String user){
+    public boolean register(String user){
         lock.lock();
         try{
             if(this.userMap.containsKey(user))
-                return;
+                return false;
             this.userMap.put(user, new HashSet<>());
-
+            return true;
         }finally {
             lock.unlock();
         }
@@ -33,27 +33,28 @@ public class NotificationManager implements INotificationManager {
         }
     }
 
-    public void addLocation(String user, Location location, int radius){
+    public boolean addLocation(String user, Location location, int radius){
         lock.lock();
         try {
             Set<LocationData> locationDataSet = this.userMap.get(user);
             if(locationDataSet==null)
-                return;
+                return false;
 
             locationDataSet.add(new LocationData(location, radius));
+            return true;
         } finally {
             lock.unlock();
         }
     }
 
-    public void remove(String user){
+    public boolean remove(String user){
         lock.lock();
         try{
             if(!this.userMap.containsKey(user))
-                return;
+                return false;
 
             this.userMap.remove(user);
-
+            return true;
         } finally {
             lock.unlock();
         }

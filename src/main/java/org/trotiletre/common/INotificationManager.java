@@ -5,8 +5,8 @@ import org.trotiletre.models.utils.Location;
 import java.io.IOException;
 
 public interface INotificationManager {
-    void register(String user) throws IOException;
-    boolean isRegistered(String user) throws IOException;
-    void addLocation(String user, Location location, int radius) throws IOException;
-    void remove(String user) throws IOException;
+    boolean register(String user) throws IOException, InterruptedException;
+    boolean isRegistered(String user) throws IOException, InterruptedException;
+    boolean addLocation(String user, Location location, int radius) throws IOException, InterruptedException;
+    boolean remove(String user) throws IOException, InterruptedException;
 }

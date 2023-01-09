@@ -1,8 +1,7 @@
-package org.trotiletre.server;
+package org.trotiletre.server.services;
 
-import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.common.ManagerTags;
 import org.trotiletre.models.utils.Location;
-import org.trotiletre.server.services.*;
 
 import java.io.*;
 import java.util.*;
@@ -11,7 +10,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RewardManager {
-    public record RewardPath(Location start, Location finish, int reward){}
+    public record RewardPath(Location start, Location finish, double reward){}
     private static class WorkSignaller{
         private final Lock workLock = new ReentrantLock();
         private final Condition workCond = workLock.newCondition();
@@ -35,7 +34,6 @@ public class RewardManager {
 
     private class RewardThread implements Runnable{
         public void run(){
-            ScooterMap scooterMap = scooterManager.getScooterMap();
             while (true){
                 try{
                     workSignaller.await();
@@ -82,13 +80,13 @@ public class RewardManager {
                             dataOutput.writeInt(rewardPath.start.y());
                             dataOutput.writeInt(rewardPath.finish.x());
                             dataOutput.writeInt(rewardPath.finish.y());
-                            dataOutput.writeInt(rewardPath.reward);
+                            dataOutput.writeDouble(rewardPath.reward);
                         }
                     } catch (IOException ignored) {
 
                     }
 
-                    responseManager.send(entry.getKey(), byteStream.toByteArray(), ManagerSkeletonTags.NOTIFICATION.tag);
+                    responseManager.send(entry.getKey(), byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
                 }
 
             }
@@ -97,21 +95,21 @@ public class RewardManager {
 
     private final WorkSignaller workSignaller = new WorkSignaller();
     private final NotificationManager notificationManager;
-    private final ScooterManager scooterManager;
+    private final ScooterMap scooterMap;
     private final AuthenticationManager authenticationManager;
     private final ResponseManager responseManager;
     private final int defaultRadius;
-    private final int defaultReward = 10;
+    private final double defaultReward = 10;
     private final Map<Location, List<RewardPath>> rewardPathMap = new HashMap<>();
     private final Lock rewardPathLock = new ReentrantLock();
 
-    public RewardManager(ResponseManager responseManager, NotificationManager notificationManager, ScooterManager scooterManager,
+    public RewardManager(ResponseManager responseManager, NotificationManager notificationManager, ScooterMap scooterMap,
                          AuthenticationManager authenticationManager, int defaultRadius){
         this.notificationManager = notificationManager;
-        this.scooterManager = scooterManager;
         this.authenticationManager = authenticationManager;
         this.defaultRadius = defaultRadius;
         this.responseManager = responseManager;
+        this.scooterMap = scooterMap;
         new Thread(new RewardThread()).start();
     }
 
@@ -134,6 +132,34 @@ public class RewardManager {
             }
 
             return rewardPathList;
+        } finally {
+            rewardPathLock.unlock();
+        }
+    }
+
+    public Optional<Double> getReward(Location start, Location finish){
+        rewardPathLock.lock();
+        try {
+            Optional<Double> optReward = Optional.empty();
+
+            List<RewardPath> rewardPathList = this.rewardPathMap.get(start);
+            if(rewardPathList==null)
+                return optReward;
+
+            for(var iter = rewardPathList.iterator(); iter.hasNext();){
+                RewardPath rewardPath = iter.next();
+                if(rewardPath.finish.equals(finish)){
+                    optReward = Optional.of(rewardPath.reward);
+                    iter.remove();
+                    break;
+                }
+            }
+
+            if(rewardPathList.size()==0){
+                this.rewardPathMap.remove(start);
+            }
+
+            return optReward;
         } finally {
             rewardPathLock.unlock();
         }
