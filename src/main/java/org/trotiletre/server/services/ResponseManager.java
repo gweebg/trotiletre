@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
@@ -31,7 +30,7 @@ public class ResponseManager {
     protected record SenderData(byte[] data, int tag, boolean stop){}
     private final Map<SocketAddress, SenderInfo> senderMap = new HashMap<>();
     private final Map<String, SocketAddress> userMap = new HashMap<>();
-    private final Map<SocketAddress, List<String>> socketMap = new HashMap<>();
+    private final Map<SocketAddress, String> socketMap = new HashMap<>();
     private final Lock mapLock = new ReentrantLock();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -63,11 +62,7 @@ public class ResponseManager {
                 return;
 
             this.userMap.put(user, socketAddress);
-            List<String> userList = this.socketMap.get(socketAddress);
-            if(userList==null)
-                this.socketMap.put(socketAddress, List.of(user));
-            else
-                userList.add(user);
+            this.socketMap.put(socketAddress, user);
 
         } finally {
             mapLock.unlock();
@@ -109,11 +104,11 @@ public class ResponseManager {
 
             SenderInfo senderInfo = this.senderMap.get(socketAddress);
             senderInfo.resourceUsers--;
-            if(senderInfo.resourceUsers ==0){
+            if(senderInfo.resourceUsers==0){
                 senderInfo.dataQueue.add(new SenderData(null, -1, true));
                 this.senderMap.remove(socketAddress);
-                List<String> userList = this.socketMap.remove(socketAddress);
-                for(String user : userList){
+                String user = this.socketMap.remove(socketAddress);
+                if(user!=null){
                     this.userMap.remove(user);
                 }
             }
