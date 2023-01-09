@@ -2,6 +2,7 @@ package org.trotiletre.client.stubs;
 
 import org.jetbrains.annotations.NotNull;
 import org.trotiletre.common.IScooterManager;
+import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
@@ -15,18 +16,20 @@ import java.nio.charset.StandardCharsets;
 public class ScooterManagerStub implements IScooterManager {
 
     private TaggedConnection connection; // The connection to the client.
+    private Demultiplexer demultiplexer; // Application demultiplexer, used to delegate different tags to different threads.
 
     /**
      * Constructs a new {@code ScooterManagerStub} object.
      *
      * @param connection a {@link TaggedConnection} object representing the connection to the client.
      */
-    public ScooterManagerStub(TaggedConnection connection) {
+    public ScooterManagerStub(TaggedConnection connection, Demultiplexer demultiplexer) {
             this.connection = connection;
+            this.demultiplexer = demultiplexer;
     }
 
     @Override
-    public @NotNull String listFreeScooters(int range, @NotNull Location lookupPosition) throws IOException {
+    public @NotNull String listFreeScooters(int range, @NotNull Location lookupPosition) throws IOException, InterruptedException {
 
         /*
          * This section handles the requests for listing the free scooters.
@@ -51,12 +54,15 @@ public class ScooterManagerStub implements IScooterManager {
         connection.send(0, data); // Sending the message to the server.
 
         // The response is a byte encoded string with all the locations. This means we just need to convert it back.
-        TaggedConnection.Frame frame = connection.receive();
-        return new String(frame.data, StandardCharsets.UTF_8); // Return the converted string from the bytes received.
+        // TaggedConnection.Frame frame = connection.receive();
+        //return new String(frame.data, StandardCharsets.UTF_8); // Return the converted string from the bytes received.
+
+        byte[] receivedData = demultiplexer.receive(0);
+        return new String(receivedData, StandardCharsets.UTF_8);
     }
 
     @Override
-    public GenericPair<String, Location> reserveScooter(int range, @NotNull Location local, String username) throws IOException {
+    public GenericPair<String, Location> reserveScooter(int range, @NotNull Location local, String username) throws IOException, InterruptedException {
 
         /*
          * This section handles the requests for renting a free scooters.
@@ -83,10 +89,11 @@ public class ScooterManagerStub implements IScooterManager {
         connection.send(0, dataStream.toByteArray()); // Sending the message to the server.
 
         // Receiving the response from the server as a frame.
-        TaggedConnection.Frame frame = connection.receive();
+        // TaggedConnection.Frame frame = connection.receive();
+        byte[] receivedData = demultiplexer.receive(0);
 
         // Unwrapping the bytes received in data into a stream of bytes.
-        ByteArrayInputStream responseStream = new ByteArrayInputStream(frame.data);
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
         DataInput response = new DataInputStream(responseStream);
 
         /*
@@ -113,7 +120,7 @@ public class ScooterManagerStub implements IScooterManager {
     }
 
     @Override
-    public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) throws IOException {
+    public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) throws IOException, InterruptedException {
 
         /*
          * This section handles the requests for parking a scooter.
@@ -140,10 +147,11 @@ public class ScooterManagerStub implements IScooterManager {
         connection.send(0, dataStream.toByteArray()); // Sending the message to the server.
 
         // Receiving the response from the server as a frame.
-        TaggedConnection.Frame frame = connection.receive();
+        // TaggedConnection.Frame frame = connection.receive();
+        byte[] receivedData = demultiplexer.receive(0);
 
         // Unwrapping the bytes received in data into a stream of bytes.
-        ByteArrayInputStream responseStream = new ByteArrayInputStream(frame.data);
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
         DataInput response = new DataInputStream(responseStream);
 
         /*

@@ -18,8 +18,14 @@ Status:
 
 ✅ - Design communication architecture.
 
-⌛ - Finish base operations.
+✅ - Finish base operations.
 
-❌ - Check for authentication.
+✅ - Check for authentication.
 
-❌ - Test the application.
+⌛ - Test the application.
+
+❌ - Add rewards.
+
+❌ - Add notifications.
+
+⌛ - Add multithreading to client.

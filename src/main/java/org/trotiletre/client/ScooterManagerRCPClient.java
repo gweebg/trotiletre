@@ -2,60 +2,84 @@ package org.trotiletre.client;
 
 import org.trotiletre.client.stubs.AuthenticationManagerStub;
 import org.trotiletre.client.stubs.ScooterManagerStub;
-import org.trotiletre.common.IScooterManager;
+import org.trotiletre.client.workers.NotificationListener;
+import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Scanner;
 
 
 public class ScooterManagerRCPClient {
 
+    private final String serverAddress;
+    private final int port;
+    private final Socket clientSocket;
+    private final TaggedConnection connection;
 
-    public static void main(String[] args) throws IOException {
+    public ScooterManagerRCPClient(String serverAddress, int port) throws IOException {
 
-        Socket clientSocket = new Socket("localhost", 20022);
-        TaggedConnection connection = new TaggedConnection(clientSocket);
+        this.serverAddress = serverAddress;
+        this.port = port;
 
-        ScooterManagerStub scooterManager = new ScooterManagerStub(connection);
+        this.clientSocket = new Socket(serverAddress, port);
+        this.connection = new TaggedConnection(clientSocket);
+    }
+
+    public void run() throws IOException, InterruptedException {
+
+        Demultiplexer demultiplexer = new Demultiplexer(connection);
+
+        ScooterManagerStub scooterManager = new ScooterManagerStub(connection, demultiplexer);
         AuthenticationManagerStub authManager = new AuthenticationManagerStub(connection);
 
-        String username = "babi";
-        String password = "password_da_babi";
+        demultiplexer.start();
+
+        // Running the notification listener.
+        new Thread(new NotificationListener(demultiplexer)).start();
+
+        /* Tests */
+        String username = "Guilherme";
+        String password = "emrehliuG";
 
         authManager.registerUser(username, password);
+        System.in.read();
+
         authManager.loginUser(username, password);
+        System.in.read();
 
-        String res = scooterManager.listFreeScooters(2, new Location(0,0));
-        System.out.println("Available scooters: " + res);
-
+        String freeScooters = scooterManager.listFreeScooters(
+                2, new Location(0,0));
+        System.out.println("Available scooters: " + freeScooters);
         System.in.read();
 
         GenericPair<String, Location> reservationCode =
-                scooterManager.reserveScooter(2, new Location(0, 0), "babi");
+                scooterManager.reserveScooter(2, new Location(0, 0), username);
 
         System.out.println("Reservation code: " + reservationCode.getFirst());
         System.out.println("Scooter at: " + reservationCode.getSecond());
-
         System.in.read();
 
         GenericPair<Double, Double> parkPrice =
-                scooterManager.parkScooter(reservationCode.getFirst(), new Location(3, 3), "babi");
+                scooterManager.parkScooter(reservationCode.getFirst(), new Location(3, 3), username);
 
         double price = parkPrice.getFirst();
 
         if (price == -1) System.out.println("Invalid reservation code!");
-
         else if (price == -2) System.out.println("You need to log in before trying any action.");
-
         else System.out.println("You have been charged " + parkPrice.getFirst() + "€");
 
         System.in.read();
+    }
 
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        ScooterManagerRCPClient client = new ScooterManagerRCPClient(
+                "localhost",
+                20022);
+
+        client.run();
     }
 }

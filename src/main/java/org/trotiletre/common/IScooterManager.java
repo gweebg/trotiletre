@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public interface IScooterManager {
 
-    public @NotNull String listFreeScooters(final int range, @NotNull Location lookupPosition) throws IOException;
-    public GenericPair<String, Location> reserveScooter(final int range, @NotNull Location local, String username) throws IOException;
-    public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) throws IOException;
+    public @NotNull String listFreeScooters(final int range, @NotNull Location lookupPosition) throws IOException, InterruptedException;
+    public GenericPair<String, Location> reserveScooter(final int range, @NotNull Location local, String username) throws IOException, InterruptedException;
+    public GenericPair<Double, Double> parkScooter(String reservationCode, Location newScooterLocation, String username) throws IOException, InterruptedException;
 
 }
