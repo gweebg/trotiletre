@@ -171,7 +171,10 @@ public class Processor {
 
             if (price == -1) System.out.println("trotiletre.error> Invalid reservation code!");
             else if (price == -2) System.out.println("trotiletre.error> You need to log in before trying any action.");
-            else System.out.println("trotiletre.info> You have been charged " + parkPrice.getFirst() + "€");
+            else {
+                currentLocation = new Location(xLocation, yLocation);
+                System.out.println("trotiletre.info> You have been charged " + parkPrice.getFirst() + "€");
+            }
 
         }
         else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
