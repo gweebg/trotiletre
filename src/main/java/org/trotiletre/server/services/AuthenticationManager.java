@@ -49,7 +49,7 @@ public class AuthenticationManager implements IAuthenticationManager {
             authLock.lock();
 
             User user = accounts.get(username);
-            if (user != null && user.matchPassword(password)) {
+            if (user != null && user.matchPassword(password) && !onlineAccounts.get(username)) {
                 onlineAccounts.put(username, true);
                 return true;
             }

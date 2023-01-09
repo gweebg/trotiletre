@@ -72,6 +72,8 @@ public class Processor {
                 if (!statusLogout) System.out.println("trotiletre.error> You cannot logout if you are not logged in.");
                 else System.out.println("trotiletre.info> Successfully logged out!");
 
+                loggedInAs = "";
+
             } else System.out.println("trotiletre.error> You cannot sign out user '" + username + "' when you are using another account.");
 
         }
@@ -115,6 +117,8 @@ public class Processor {
         helpMenu.append("trotiletre.help> 'park [reservation_code] [x] [y]' park the scooter indicated by the provided reservation code at (x,y) coordinates.\n");
         helpMenu.append("trotiletre.help> 'list' list available scooters within the range\n");
         helpMenu.append("trotiletre.help> 'listr' list available rewards within the range");
+
+        helpMenu.append("trotiletre.help> 'logout [username]' logout the user provied in the username");
 
         System.out.println(helpMenu);
     }
