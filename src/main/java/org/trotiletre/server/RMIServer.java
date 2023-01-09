@@ -1,10 +1,13 @@
 package org.trotiletre.server;
 
 import org.trotiletre.common.communication.Skeleton;
-import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.NotificationManager;
+import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.server.services.ScooterManager;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
+import org.trotiletre.common.ManagerSkeletonTags;
+import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
 import java.io.*;
@@ -61,13 +64,19 @@ public class RMIServer {
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
 
-        // Creating the authentication, notification and scooter services.
-        AuthenticationManager authManager = new AuthenticationManager();
-        ScooterManager scooterManager = new ScooterManager(authManager);
-
         // Register service skeletons.
-        services.put(0, new ScooterManagerSkeleton(scooterManager));
-        services.put(1, new AuthenticationManagerSkeleton(authManager));
+        AuthenticationManager authenticationManager = new AuthenticationManager();
+        ScooterManager scooterManager = new ScooterManager(authenticationManager);
+        ResponseManager responseManager = new ResponseManager();
+        NotificationManager notificationManager = new NotificationManager();
+
+        RewardManager rewardManager = new RewardManager(responseManager, notificationManager, scooterManager,
+                authenticationManager, 2);
+
+        services.put(ManagerSkeletonTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager, responseManager));
+        services.put(ManagerSkeletonTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager, responseManager, rewardManager));
+        services.put(ManagerSkeletonTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager, responseManager));
+
 
         // Listen for incoming connections.
         while (true) {
@@ -75,7 +84,7 @@ public class RMIServer {
             try {
 
                 Socket s = socket.accept();
-                Worker worker = new Worker(s, services);
+                Worker worker = new Worker(s, services, responseManager);
                 new Thread(worker).start();
 
             } catch (IOException e) {

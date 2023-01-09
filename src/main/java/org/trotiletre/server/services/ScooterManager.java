@@ -24,7 +24,7 @@ public class ScooterManager implements IScooterManager {
     private Map<UUID, Reservation> reservation = new HashMap<>(); // Reservations made by the users.
 
     // Concurrency control variables.
-    private ReentrantLock managerLock = new ReentrantLock();
+    private final ReentrantLock managerLock = new ReentrantLock();
 
     /**
      * Creates a new scooter manager using the given authentication manager.
@@ -39,6 +39,10 @@ public class ScooterManager implements IScooterManager {
         // Create a new scooter map with the specified size and starting number of scooters.
         this.map = new ScooterMap(ScooterManager.mapSize, ScooterManager.startingScooters);
         map.populateMap(); // Populate the map with scooters.
+    }
+
+    public ScooterMap getScooterMap(){
+        return this.map;
     }
 
     /**

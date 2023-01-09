@@ -4,10 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.trotiletre.models.Scooter;
 import org.trotiletre.models.utils.Location;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class ScooterMap {
@@ -23,7 +20,7 @@ public class ScooterMap {
     private List<Scooter>[][] map;
     private final int startingScooters;
 
-    private ReentrantLock mapLock = new ReentrantLock();
+    private final ReentrantLock mapLock = new ReentrantLock();
 
     public ScooterMap(final int mapSize, final int startingScooters) {
 
@@ -37,6 +34,10 @@ public class ScooterMap {
         }
 
         this.startingScooters = startingScooters;
+    }
+
+    public int getMapSize(){
+        return this.map.length;
     }
 
     public void populateMap() {
@@ -132,6 +133,60 @@ public class ScooterMap {
 
         } finally {
             mapLock.unlock();
+        }
+    }
+
+    public int getNumberOfScootersAt(int x, int y){
+        this.mapLock.lock();
+        try {
+            return this.map[y][x].size();
+        } finally {
+            this.mapLock.unlock();
+        }
+    }
+
+
+    public Map<Location, Set<Location>> getRewardPaths(int emptyRadius){
+        this.mapLock.lock();
+        try {
+            Map<Location, Set<Location>> rewardPaths = new HashMap<>();
+            if(emptyRadius<=0)
+                return rewardPaths;
+
+            Set<Location> startList = new HashSet<>();
+            Set<Location> finishList = new HashSet<>();
+
+            for(int y=0;y<this.map.length;++y){
+                for(int x=0;x<this.map.length;++x){
+                    if(this.map[y][x].size()>1)
+                        startList.add(new Location(x,y));
+                    else if(this.map[y][x].size()==0){
+                        boolean shouldHaveReward=true;
+                        for(int i=emptyRadius;i>-emptyRadius && shouldHaveReward;--i){
+                            int yy=y+i;
+                            if(i==0 || yy<0 || yy>this.map.length)
+                                continue;
+                            for(int j=emptyRadius;j>-emptyRadius && shouldHaveReward;--j){
+                                int xx=x+j;
+                                if(j==0 || xx<0 || xx>this.map.length)
+                                    continue;
+                                if (this.map[yy][xx].size() > 0) {
+                                    shouldHaveReward = false;
+                                }
+                            }
+                        }
+                        if(shouldHaveReward)
+                            finishList.add(new Location(x,y));
+                    }
+                }
+            }
+            for(Location start : startList)
+                rewardPaths.put(start, finishList);
+
+            return rewardPaths;
+
+        } finally {
+            this.mapLock.unlock();
         }
     }
 

@@ -3,8 +3,10 @@ package org.trotiletre.server.skeletons;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ResponseManager;
 
 import java.io.*;
+import java.net.SocketAddress;
 
 /**
  * A class that implements the {@link Skeleton} interface for the {@link AuthenticationManager} class.
@@ -14,16 +16,20 @@ import java.io.*;
 public class AuthenticationManagerSkeleton implements Skeleton {
 
     private final AuthenticationManager auth; // The auth instance to delegate to.
+    private final ResponseManager responseManager;
 
     /**
      * Constructs a new skeleton implementation for the given auth instance.
      *
      * @param auth The auth service instance.
      */
-    public AuthenticationManagerSkeleton(AuthenticationManager auth) { this.auth = auth; }
+    public AuthenticationManagerSkeleton(AuthenticationManager auth, ResponseManager responseManager) {
+        this.auth = auth;
+        this.responseManager = responseManager;
+    }
 
     @Override
-    public void handle(byte[] data, TaggedConnection connection) throws Exception {
+    public void handle(byte[] data, SocketAddress socketAddress) throws Exception {
 
         // Unwrapping the data obtained in 'data' argument.
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
@@ -133,10 +139,12 @@ public class AuthenticationManagerSkeleton implements Skeleton {
                 System.out.println("server> Failed to log out user '" + username + "'.");
                 dataOutput.writeBoolean(false);
             }
-
-            // Sending to the client.
-            connection.send(0, output.toByteArray());
+            auth.loginUser(username, passwordHash);
+            responseManager.registerUser(username, socketAddress);
+            responseManager.send(socketAddress, output.toByteArray(),0);
         }
+
+    }
 
         if (operation == 3) {
 

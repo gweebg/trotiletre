@@ -1,5 +1,7 @@
 package org.trotiletre.common.communication;
 
+import java.net.SocketAddress;
+
 /**
  * An interface for handling data streams.
  * <p>
@@ -14,5 +16,5 @@ public interface Skeleton {
      * @param connection
      * @throws Exception If an error occurs while handling the streams.
      */
-    public void handle(byte[] receivedData, TaggedConnection connection) throws Exception;
+    public void handle(byte[] receivedData, SocketAddress socketAddress) throws Exception;
 }

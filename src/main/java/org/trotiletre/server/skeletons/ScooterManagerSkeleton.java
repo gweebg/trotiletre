@@ -1,12 +1,19 @@
 package org.trotiletre.server.skeletons;
 
+import org.trotiletre.common.ManagerSkeletonTags;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.GenericPair;
+import org.trotiletre.server.RewardManager;
+import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.models.utils.Location;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.ScooterManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.net.SocketAddress;
 import java.io.*;
 
 /**
@@ -17,7 +24,9 @@ import java.io.*;
 public class ScooterManagerSkeleton implements Skeleton {
 
     private final ScooterManager scooterManager; // The scooterManager instance to delegate to.
-    private AuthenticationManager authManager; // The authManager instance to delegate to.
+    private final AuthenticationManager authManager; // The authManager instance to delegate to.
+    private final ResponseManager responseManager;
+    private final RewardManager rewardManager;
 
     /**
      * Constructs a new skeleton implementation for the given server instance.
@@ -27,6 +36,10 @@ public class ScooterManagerSkeleton implements Skeleton {
     public ScooterManagerSkeleton(ScooterManager scooterManager) {
         this.scooterManager = scooterManager;
         this.authManager = scooterManager.getAuthManager();
+    public ScooterManagerSkeleton(ScooterManager scooterManager, ResponseManager responseManager, RewardManager rewardManager) {
+        this.scooterManager = scooterManager;
+        this.responseManager = responseManager;
+        this.rewardManager = rewardManager;
     }
 
     /**
@@ -38,7 +51,7 @@ public class ScooterManagerSkeleton implements Skeleton {
      * @throws Exception If it can't communicate with the client.
      */
     @Override
-    public void handle(byte[] data, TaggedConnection connection) throws Exception {
+    public void handle(byte[] data, SocketAddress socketAddress) throws Exception {
 
         /* Unwrapping the data obtained in 'data' argument. */
         ByteArrayInputStream dataStream = new ByteArrayInputStream(data);
