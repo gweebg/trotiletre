@@ -1,6 +1,7 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.CommunicationTags;
+import org.trotiletre.common.AnswerTag;
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.NotificationManager;
@@ -79,7 +80,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.AUTHENTICATION_MAN.tag);
+            responseManager.send(socketAddress, output.toByteArray(), AnswerTag.ANSWER.tag);
         }
 
         if (operation == 1) {
@@ -114,7 +115,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.AUTHENTICATION_MAN.tag);
+            responseManager.send(socketAddress, output.toByteArray(), AnswerTag.ANSWER.tag);
         }
 
         if (operation == 2) {
@@ -146,7 +147,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
                 System.out.println("server> Failed to log out user '" + username + "'.");
                 dataOutput.writeBoolean(false);
             }
-            responseManager.send(socketAddress, output.toByteArray(),0);
+            responseManager.send(socketAddress, output.toByteArray(), AnswerTag.ANSWER.tag);
         }
 
     }

@@ -1,6 +1,7 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.CommunicationTags;
+import org.trotiletre.common.AnswerTag;
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.server.services.RewardManager;
@@ -84,7 +85,7 @@ public class ScooterManagerSkeleton implements Skeleton {
             System.out.println("server> Client asked requested for the list of scooters.");
 
             // Sending to the user the obtained results.
-            responseManager.send(socketAddress, listedScooters.getBytes(), CommunicationTags.SCOOTER_MAN.tag);
+            responseManager.send(socketAddress, listedScooters.getBytes(), AnswerTag.ANSWER.tag);
         }
 
         if (operation == 1) {
@@ -116,7 +117,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
                 System.out.println("server> User '" + username + "' is not logged in.");
                 dataOutput.writeInt(2);
-                responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.SCOOTER_MAN.tag);
+                responseManager.send(socketAddress, output.toByteArray(), AnswerTag.ANSWER.tag);
                 return;
             }
 
@@ -156,7 +157,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             // Packing the data onto a byte[] and sending to the client.
             byte[] responseData = output.toByteArray();
-            responseManager.send(socketAddress, responseData, CommunicationTags.SCOOTER_MAN.tag);
+            responseManager.send(socketAddress, responseData, AnswerTag.ANSWER.tag);
         }
 
         if (operation == 2) {
@@ -189,7 +190,7 @@ public class ScooterManagerSkeleton implements Skeleton {
                 System.out.println("server> User '" + username + "' is not logged in.");
 
                 dataOutput.writeInt(2);
-                responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.SCOOTER_MAN.tag);
+                responseManager.send(socketAddress, output.toByteArray(), AnswerTag.ANSWER.tag);
                 return;
             }
 
@@ -235,7 +236,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             // Packing and sending the data to the client.
             byte[] responseData = output.toByteArray();
-            responseManager.send(socketAddress, responseData, CommunicationTags.SCOOTER_MAN.tag);
+            responseManager.send(socketAddress, responseData, AnswerTag.ANSWER.tag);
         }
 
         if (operation == 3) {
@@ -276,7 +277,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             // Packing and sending the data to the client.
             byte[] responseData = output.toByteArray();
-            responseManager.send(socketAddress, responseData, CommunicationTags.SCOOTER_MAN.tag);
+            responseManager.send(socketAddress, responseData, AnswerTag.ANSWER.tag);
         }
     }
 

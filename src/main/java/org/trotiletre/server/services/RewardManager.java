@@ -1,6 +1,7 @@
 package org.trotiletre.server.services;
 
-import org.trotiletre.common.CommunicationTags;
+import org.trotiletre.common.AnswerTag;
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.models.utils.Location;
 
 import java.io.*;
@@ -103,7 +104,7 @@ public class RewardManager {
 
                     }
 
-                    responseManager.send(entry.getKey(), byteStream.toByteArray(), CommunicationTags.NOTIFICATION.tag);
+                    responseManager.send(entry.getKey(), byteStream.toByteArray(), AnswerTag.NOTIFICATION.tag);
                 }
 
             }

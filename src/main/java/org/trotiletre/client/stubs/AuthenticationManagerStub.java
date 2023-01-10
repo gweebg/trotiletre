@@ -1,7 +1,8 @@
 package org.trotiletre.client.stubs;
 
+import org.trotiletre.common.AnswerTag;
 import org.trotiletre.common.IAuthenticationManager;
-import org.trotiletre.common.CommunicationTags;
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.User;
@@ -48,10 +49,10 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
         // Converting the ByteArrayOutputStream into a primitive byte[].
         byte[] data = dataStream.toByteArray();
 
-        connection.send(CommunicationTags.AUTHENTICATION_MAN.tag, data); // Sending the message to the server.
+        connection.send(ManagerTag.AUTHENTICATION.tag, data); // Sending the message to the server.
 
         // Waiting for a response from the server.
-        byte[] receivedData = demultiplexer.receive(CommunicationTags.AUTHENTICATION_MAN.tag);
+        byte[] receivedData = demultiplexer.receive(AnswerTag.ANSWER.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
@@ -85,10 +86,10 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
         // Converting the ByteArrayOutputStream into a primitive byte[].
         byte[] data = dataStream.toByteArray();
 
-        connection.send(CommunicationTags.AUTHENTICATION_MAN.tag, data); // Sending the message to the server.
+        connection.send(ManagerTag.AUTHENTICATION.tag, data); // Sending the message to the server.
 
         // Waiting for a response from the server.
-        byte[] receivedData = demultiplexer.receive(CommunicationTags.AUTHENTICATION_MAN.tag);
+        byte[] receivedData = demultiplexer.receive(AnswerTag.ANSWER.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
@@ -109,10 +110,10 @@ public class AuthenticationManagerStub implements IAuthenticationManager {
         dataOutput.writeUTF(username); // Writing the username.
 
         // Converting the ByteArrayOutputStream into a primitive byte[].
-        connection.send(CommunicationTags.AUTHENTICATION_MAN.tag, dataStream.toByteArray()); // Sending the message to the server.
+        connection.send(ManagerTag.AUTHENTICATION.tag, dataStream.toByteArray()); // Sending the message to the server.
 
         // Waiting for a response from the server.
-        byte[] receivedData = demultiplexer.receive(0);
+        byte[] receivedData = demultiplexer.receive(AnswerTag.ANSWER.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);

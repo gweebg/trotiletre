@@ -1,13 +1,13 @@
 package org.trotiletre.client.workers;
 
-import org.trotiletre.common.CommunicationTags;
+import org.trotiletre.common.AnswerTag;
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Demultiplexer;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * A class that listens for notification messages and prints them to the console.
@@ -37,7 +37,7 @@ public class NotificationListener implements Runnable {
             try {
 
                 // Receiving the notification data from the queue on the demultiplexer.
-                byte[] notificationData = demultiplexer.receive(CommunicationTags.NOTIFICATION.tag);
+                byte[] notificationData = demultiplexer.receive(AnswerTag.NOTIFICATION.tag);
 
                 DataInput dataInput = new DataInputStream(new ByteArrayInputStream(notificationData));
                 int numPaths = dataInput.readInt();
