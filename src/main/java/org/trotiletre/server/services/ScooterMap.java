@@ -162,11 +162,11 @@ public class ScooterMap {
                         startList.add(new Location(x,y));
                     else if(this.map[y][x].size()==0){
                         boolean shouldHaveReward=true;
-                        for(int i=emptyRadius;i>-emptyRadius && shouldHaveReward;--i){
+                        for(int i=emptyRadius;i>=-emptyRadius && shouldHaveReward;--i){
                             int yy=y+i;
                             if(i==0 || yy<0 || yy>=this.map.length)
                                 continue;
-                            for(int j=emptyRadius;j>-emptyRadius && shouldHaveReward;--j){
+                            for(int j=emptyRadius;j>=-emptyRadius && shouldHaveReward;--j){
                                 int xx=x+j;
                                 if(j==0 || xx<0 || xx>=this.map.length)
                                     continue;

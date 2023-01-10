@@ -262,7 +262,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             System.out.println("server> User for listing of rewards.");
 
-            // Delegating the request to the scooter manager service.
+            // Delegating the request to the reward manager service.
             List<RewardManager.RewardPath> rewardList = rewardManager.getRewardPaths(
                     new Location(locationX, locationY),
                     range
@@ -276,7 +276,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             // Packing and sending the data to the client.
             byte[] responseData = output.toByteArray();
-            responseManager.send(socketAddress, responseData, ManagerTags.SCOOTER.tag);
+            responseManager.send(socketAddress, responseData, CommunicationTags.SCOOTER_MAN.tag);
         }
     }
 

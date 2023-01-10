@@ -63,8 +63,8 @@ public class Processor {
         operationPatterns.put("notif", Pattern.compile("notif\\s+(\\w+)"));
         operations.put("notif", this.getClass().getMethod("processNotif", String.class));
 
-        operationPatterns.put("sendNotifLoc", Pattern.compile("sendNotifLoc\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
-        operations.put("sendNotifLoc", this.getClass().getMethod("processNotifLoc", String.class));
+        operationPatterns.put("notiflocation", Pattern.compile("notiflocation\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
+        operations.put("notiflocation", this.getClass().getMethod("processNotifLocation", String.class));
 
         operations.put("listr", this.getClass().getMethod("processListRewards", String.class));
 
@@ -130,7 +130,7 @@ public class Processor {
         helpMenu.append("trotiletre.help> 'logout [username]' logout the user provied in the username");
         helpMenu.append("trotiletre.help> 'status' displays information about the user\n");
         helpMenu.append("trotiletre.help> 'notif [on/off]' enables or disables push notifications\n");
-        helpMenu.append("trotiletre.help> 'sendNotifLoc [x] [y] [radius]' add new location to receive notifications\n");
+        helpMenu.append("trotiletre.help> 'notiflocation [x] [y] [radius]' add new location and radius to receive notifications\n");
 
         helpMenu.append("trotiletre.help> 'setlocation [x] [y]' set the user location to (x,y) coordinates\n");
         helpMenu.append("trotiletre.help> 'setrange [range]' set range to search scooters for\n");
@@ -173,8 +173,8 @@ public class Processor {
 
     }
 
-    public void processSendNotifLoc(String userCommand) throws IOException, InterruptedException {
-        Pattern parkPattern = operationPatterns.get("sendNotifLoc");
+    public void processNotifLocation(String userCommand) throws IOException, InterruptedException {
+        Pattern parkPattern = operationPatterns.get("notiflocation");
         Matcher m = parkPattern.matcher(userCommand);
 
         if(m.find()){
@@ -187,7 +187,7 @@ public class Processor {
             if(b) System.out.println("trotiletre.info> Added new location to receive notifications");
             else System.out.println("trotiletre.error> Could not add location");
         }
-        else System.out.println("trotiletre.error> Invalid usage of 'sendNotifLoc' command, check the help menu.");
+        else System.out.println("trotiletre.error> Invalid usage of 'notiflocation' command, check the help menu.");
 
     }
 

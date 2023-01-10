@@ -49,12 +49,15 @@ public class RewardManager {
                 rewardPathLock.lock();
 
                 rewardPathMap.clear();
-
+                reversePathMap.clear();
 
                 for(Map.Entry<Location, Set<Location>> entry : scooterMap.getRewardPaths(defaultRadius).entrySet()){
-                    List<RewardPath> rewardPathList = new ArrayList<>();
+                    Set<RewardPath> rewardPathList = new HashSet<>();
                     for(Location finish : entry.getValue()){
-                        rewardPathList.add(new RewardPath(entry.getKey(), finish, defaultReward));
+                        RewardPath rewardPath = new RewardPath(entry.getKey(), finish, defaultReward);
+                        rewardPathList.add(rewardPath);
+                        Set<RewardPath> reverseSet = reversePathMap.computeIfAbsent(finish, k -> new HashSet<>());
+                        reverseSet.add(rewardPath);
                     }
                     rewardPathMap.put(entry.getKey(), rewardPathList);
                 }
@@ -65,10 +68,10 @@ public class RewardManager {
                     List<RewardPath> rewardPathList = new ArrayList<>();
 
                     for(NotificationManager.LocationData locationData : notificationManager.getUserLocationSet(user)){
-                        var rewardMapPathList = rewardPathMap.get(locationData.location());
-                        if(rewardMapPathList == null)
+                        var rewardMapPathSet = reversePathMap.get(locationData.location());
+                        if(rewardMapPathSet == null)
                             continue;
-                        for(RewardPath rewardPath : rewardMapPathList){
+                        for(RewardPath rewardPath : rewardMapPathSet){
                             if(rewardPath.start.manhattanDistance(rewardPath.finish)<=locationData.radius()){
                                 rewardPathList.add(rewardPath);
                             }
@@ -76,6 +79,8 @@ public class RewardManager {
                     }
                     notifUsers.put(user, rewardPathList);
                 }
+
+                rewardPathLock.unlock();
 
                 for(Map.Entry<String, List<RewardPath>> entry : notifUsers.entrySet()){
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
@@ -112,7 +117,8 @@ public class RewardManager {
     private final ResponseManager responseManager;
     private final int defaultRadius;
     private final double defaultReward = 10;
-    private final Map<Location, List<RewardPath>> rewardPathMap = new HashMap<>();
+    private final Map<Location, Set<RewardPath>> rewardPathMap = new HashMap<>();
+    private final Map<Location, Set<RewardPath>> reversePathMap = new HashMap<>();
     private final Lock rewardPathLock = new ReentrantLock();
 
     public RewardManager(ResponseManager responseManager, NotificationManager notificationManager, ScooterMap scooterMap,
@@ -123,6 +129,7 @@ public class RewardManager {
         this.responseManager = responseManager;
         this.scooterMap = scooterMap;
         new Thread(new RewardThread()).start();
+        this.workSignaller.signal();
     }
 
 
@@ -130,11 +137,40 @@ public class RewardManager {
         this.workSignaller.signal();
     }
 
+    public List<RewardPath> getRewardPathsOther(Location sstart, int radius) {
+        rewardPathLock.lock();
+        try {
+            List<Location> searchList = new ArrayList<>();
+            searchList.add(sstart);
+            for(Location location : this.rewardPathMap.keySet()){
+                if(location.manhattanDistance(sstart)<=radius)
+                    searchList.add(location);
+            }
+
+            List<RewardPath> rewardPathList = new ArrayList<>();
+            for(Location start : searchList){
+                Set<RewardPath> mapRewardPathList = this.rewardPathMap.get(start);
+                if(mapRewardPathList==null)
+                    continue;
+
+                for(RewardPath rewardPath : mapRewardPathList){
+                    if(start.manhattanDistance(rewardPath.finish)<=radius)
+                        rewardPathList.add(rewardPath);
+                }
+            }
+            return rewardPathList;
+
+
+        } finally {
+            rewardPathLock.unlock();
+        }
+    }
+
     public List<RewardPath> getRewardPaths(Location start, int radius) {
         rewardPathLock.lock();
         try {
             List<RewardPath> rewardPathList = new ArrayList<>();
-            List<RewardPath> mapRewardPathList = this.rewardPathMap.get(start);
+            Set<RewardPath> mapRewardPathList = this.rewardPathMap.get(start);
             if(mapRewardPathList==null)
                 return rewardPathList;
 
@@ -154,7 +190,7 @@ public class RewardManager {
         try {
             Optional<Double> optReward = Optional.empty();
 
-            List<RewardPath> rewardPathList = this.rewardPathMap.get(start);
+            Set<RewardPath> rewardPathList = this.rewardPathMap.get(start);
             if(rewardPathList==null)
                 return optReward;
 

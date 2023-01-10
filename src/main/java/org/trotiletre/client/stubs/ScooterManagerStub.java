@@ -201,11 +201,11 @@ public class ScooterManagerStub implements IScooterManager {
         dataOutput.writeInt(local.y()); // Writing the y of the new position.
         dataOutput.writeInt(range); // Writing the username for authentication.
 
-        connection.send(ManagerTags.SCOOTER.tag, dataStream.toByteArray()); // Sending the message to the server.
+        connection.send(CommunicationTags.SCOOTER_MAN.tag, dataStream.toByteArray()); // Sending the message to the server.
 
         // Receiving the response from the server as a frame.
         // TaggedConnection.Frame frame = connection.receive();
-        byte[] receivedData = demultiplexer.receive(ManagerTags.SCOOTER.tag);
+        byte[] receivedData = demultiplexer.receive(CommunicationTags.SCOOTER_MAN.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
@@ -216,7 +216,7 @@ public class ScooterManagerStub implements IScooterManager {
         StringBuilder rewards = new StringBuilder();
 
         for (int i = 0; i < length; i++) {
-            rewards.append(response.readUTF() + "\n");
+            rewards.append(response.readUTF()).append("\n");
         }
 
         return rewards.toString();

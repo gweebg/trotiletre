@@ -68,7 +68,7 @@ public class RMIServer {
         ResponseManager responseManager = new ResponseManager();
         NotificationManager notificationManager = new NotificationManager();
         RewardManager rewardManager = new RewardManager(responseManager, notificationManager, scooterMap,
-                authenticationManager, 2);
+                authenticationManager, 1);
         ScooterManager scooterManager = new ScooterManager(scooterMap, authenticationManager, rewardManager);
 
 
@@ -97,7 +97,7 @@ public class RMIServer {
 
     public static void main(String[] args) throws Exception {
 
-        RMIServer server = new RMIServer(20022);
+        RMIServer server = new RMIServer(12345);
         server.runServer();
 
     }

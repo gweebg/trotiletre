@@ -38,7 +38,7 @@ public class Application {
         this.notificationManager = new NotificationManagerStub(connection, demultiplexer);
 
         demultiplexer.start();
-//        new Thread(new NotificationListener(demultiplexer)).start();
+        new Thread(new NotificationListener(demultiplexer)).start();
     }
 
     public void run() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
