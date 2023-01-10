@@ -14,6 +14,7 @@ import java.io.DataInput;
 import java.io.DataInputStream;
 import java.net.SocketAddress;
 import java.io.*;
+import java.util.List;
 
 /**
  * A class that implements the {@link Skeleton} interface for the {@link ScooterManager} class.
@@ -44,7 +45,7 @@ public class ScooterManagerSkeleton implements Skeleton {
      * replies to the client with the answer.
      *
      * @param data Data received from the connection.
-     * @param connection The connection object.
+     * @param socketAddress The socket to the client object.
      * @throws Exception If it can't communicate with the client.
      */
     @Override
@@ -230,6 +231,47 @@ public class ScooterManagerSkeleton implements Skeleton {
                 dataOutput.writeDouble(price); // Writing price.
 
                 if (bountyPrice != null) dataOutput.writeDouble(bountyPrice); // Writing bounty is available.
+            }
+
+            // Packing and sending the data to the client.
+            byte[] responseData = output.toByteArray();
+            responseManager.send(socketAddress, responseData, ManagerTags.SCOOTER.tag);
+        }
+
+        if (operation == 3) {
+
+            /*
+             * This section handles the requests for listing rewards.
+             * The message we are expecting to receive will have:
+             *  + The reservation identification of the scooter: UTF.
+             *  + x coordinate of the new position: Integer.
+             *  + y coordinate of the new position: Integer.
+             *  + The user's username, used to check whether he is authenticated.
+             *
+             *  This operation requires authentication.
+             * public List<RewardPath> getRewardPaths(Location start, int radius)
+             */
+
+            // New byte array stream to put our results.
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            DataOutput dataOutput = new DataOutputStream(output);
+
+            int locationX = payload.readInt(); // X coordinate of the starting position.
+            int locationY = payload.readInt(); // Y coordinate of the starting position.
+            int range = payload.readInt(); // Search range.
+
+            System.out.println("server> User for listing of rewards.");
+
+            // Delegating the request to the scooter manager service.
+            List<RewardManager.RewardPath> rewardList = rewardManager.getRewardPaths(
+                    new Location(locationX, locationY),
+                    range
+            );
+
+            dataOutput.writeInt(rewardList.size());
+
+            for (RewardManager.RewardPath r: rewardList) {
+                dataOutput.writeUTF(r.toString());
             }
 
             // Packing and sending the data to the client.
