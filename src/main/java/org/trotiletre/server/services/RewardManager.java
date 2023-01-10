@@ -90,7 +90,7 @@ public class RewardManager {
                         if(rewardPathList.size()==0){
                             continue;
                         }
-                        System.out.println("Sending Notif to " + entry.getKey());
+                        System.out.println("server> Sending notification to " + entry.getKey());
                         dataOutput.writeInt(rewardPathList.size());
                         for(RewardPath rewardPath : rewardPathList){
                             dataOutput.writeInt(rewardPath.start.x());

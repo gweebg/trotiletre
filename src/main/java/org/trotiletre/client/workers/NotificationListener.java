@@ -35,14 +35,9 @@ public class NotificationListener implements Runnable {
         while (true) {
 
             try {
-                /*
-                 * The message we are expecting to receive will have:
-                 *  + locations, a byte encoded string.
-                 */
 
                 // Receiving the notification data from the queue on the demultiplexer.
                 byte[] notificationData = demultiplexer.receive(CommunicationTags.NOTIFICATION.tag);
-                System.out.println("Received Notif");
 
                 DataInput dataInput = new DataInputStream(new ByteArrayInputStream(notificationData));
                 int numPaths = dataInput.readInt();
@@ -54,8 +49,9 @@ public class NotificationListener implements Runnable {
                     int fy = dataInput.readInt();
                     double reward = dataInput.readDouble();
 
-                    System.out.println("Found reward: Start("+x+","+y+") Finish("+fx+","+fy+") Reward "+reward);
+                    System.out.println("\ntrotiletre.notif> Found reward: Start: ("+x+","+y+") End: ("+fx+","+fy+") Reward: "+reward+"€");
                 }
+                System.out.print("trotiletre>");
 
             } catch (IOException | InterruptedException e) {
                 // If there is an exception, wrap it in a RuntimeException and throw it.
