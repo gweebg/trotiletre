@@ -1,6 +1,6 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.NotificationManager;
@@ -79,7 +79,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            responseManager.send(socketAddress, output.toByteArray(), ManagerTags.AUTHENTICATION.tag);
+            responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.AUTHENTICATION_MAN.tag);
         }
 
         if (operation == 1) {
@@ -114,7 +114,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
             }
 
             // Sending to the client.
-            responseManager.send(socketAddress, output.toByteArray(), ManagerTags.AUTHENTICATION.tag);
+            responseManager.send(socketAddress, output.toByteArray(), CommunicationTags.AUTHENTICATION_MAN.tag);
         }
 
         if (operation == 2) {

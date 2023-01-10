@@ -1,7 +1,7 @@
 package org.trotiletre.client.stubs;
 
 import org.trotiletre.common.INotificationManager;
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.common.NotificationOperations;
 import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
@@ -25,9 +25,9 @@ public class NotificationManagerStub implements INotificationManager {
 
         dataOutput.writeInt(NotificationOperations.REGISTER.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(CommunicationTags.NOTIFICATION_MAN.tag, dataStream.toByteArray());
 
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(CommunicationTags.NOTIFICATION_MAN.tag)));
         return dataInput.readBoolean();
     }
 
@@ -37,9 +37,9 @@ public class NotificationManagerStub implements INotificationManager {
 
         dataOutput.writeInt(NotificationOperations.IS_REGISTERED.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(CommunicationTags.NOTIFICATION_MAN.tag, dataStream.toByteArray());
 
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(CommunicationTags.NOTIFICATION_MAN.tag)));
         return dataInput.readBoolean();
     }
 
@@ -53,9 +53,9 @@ public class NotificationManagerStub implements INotificationManager {
         dataOutput.writeInt(location.y());
         dataOutput.writeInt(radius);
 
-        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(CommunicationTags.NOTIFICATION_MAN.tag, dataStream.toByteArray());
 
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(CommunicationTags.NOTIFICATION_MAN.tag)));
         return dataInput.readBoolean();
     }
 
@@ -65,9 +65,9 @@ public class NotificationManagerStub implements INotificationManager {
 
         dataOutput.writeInt(NotificationOperations.REMOVE.operationTag);
         dataOutput.writeUTF(user);
-        connection.send(ManagerTags.NOTIFICATION.tag, dataStream.toByteArray());
+        connection.send(CommunicationTags.NOTIFICATION_MAN.tag, dataStream.toByteArray());
 
-        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(ManagerTags.NOTIFICATION.tag)));
+        DataInput dataInput = new DataInputStream(new ByteArrayInputStream(demultiplexer.receive(CommunicationTags.NOTIFICATION_MAN.tag)));
         return dataInput.readBoolean();
     }
 }

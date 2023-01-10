@@ -164,7 +164,7 @@ public class Processor {
 
     }
 
-    public void processNotifLoc(String userCommand) throws IOException, InterruptedException {
+    public void processSendNotifLoc(String userCommand) throws IOException, InterruptedException {
         Pattern parkPattern = operationPatterns.get("sendNotifLoc");
         Matcher m = parkPattern.matcher(userCommand);
 

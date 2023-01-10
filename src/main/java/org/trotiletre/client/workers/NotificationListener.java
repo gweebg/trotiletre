@@ -1,7 +1,11 @@
 package org.trotiletre.client.workers;
 
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.common.communication.Demultiplexer;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
@@ -37,13 +41,21 @@ public class NotificationListener implements Runnable {
                  */
 
                 // Receiving the notification data from the queue on the demultiplexer.
-                byte[] notificationData = demultiplexer.receive(1);
+                byte[] notificationData = demultiplexer.receive(CommunicationTags.NOTIFICATION.tag);
+                System.out.println("Received Notif");
 
-                // Unpacking the binary encoded string into a normal UTF-8 encoded string.
-                String locations = new String(notificationData, StandardCharsets.UTF_8);
+                DataInput dataInput = new DataInputStream(new ByteArrayInputStream(notificationData));
+                int numPaths = dataInput.readInt();
 
-                // Print the notification message
-                System.out.println("trotiletre.notif> New rewards found at: " + locations);
+                for(int i=0;i<numPaths;++i){
+                    int x = dataInput.readInt();
+                    int y = dataInput.readInt();
+                    int fx = dataInput.readInt();
+                    int fy = dataInput.readInt();
+                    double reward = dataInput.readDouble();
+
+                    System.out.println("Found reward: Start("+x+","+y+") Finish("+fx+","+fy+") Reward "+reward);
+                }
 
             } catch (IOException | InterruptedException e) {
                 // If there is an exception, wrap it in a RuntimeException and throw it.

@@ -1,6 +1,6 @@
 package org.trotiletre.server.services;
 
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.models.utils.Location;
 
 import java.io.*;
@@ -60,7 +60,10 @@ public class RewardManager {
                     List<RewardPath> rewardPathList = new ArrayList<>();
 
                     for(NotificationManager.LocationData locationData : notificationManager.getUserLocationSet(user)){
-                        for(RewardPath rewardPath : rewardPathMap.get(locationData.location())){
+                        var rewardMapPathList = rewardPathMap.get(locationData.location());
+                        if(rewardMapPathList == null)
+                            continue;
+                        for(RewardPath rewardPath : rewardMapPathList){
                             if(rewardPath.start.manhattanDistance(rewardPath.finish)<=locationData.radius()){
                                 rewardPathList.add(rewardPath);
                             }
@@ -74,6 +77,10 @@ public class RewardManager {
                     DataOutput dataOutput = new DataOutputStream(byteStream);
                     List<RewardPath> rewardPathList = entry.getValue();
                     try{
+                        if(rewardPathList.size()==0){
+                            continue;
+                        }
+                        System.out.println("Sending Notif to " + entry.getKey());
                         dataOutput.writeInt(rewardPathList.size());
                         for(RewardPath rewardPath : rewardPathList){
                             dataOutput.writeInt(rewardPath.start.x());
@@ -86,7 +93,7 @@ public class RewardManager {
 
                     }
 
-                    responseManager.send(entry.getKey(), byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
+                    responseManager.send(entry.getKey(), byteStream.toByteArray(), CommunicationTags.NOTIFICATION.tag);
                 }
 
             }

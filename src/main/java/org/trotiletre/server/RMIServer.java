@@ -3,7 +3,7 @@ package org.trotiletre.server;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.server.services.*;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
@@ -72,11 +72,11 @@ public class RMIServer {
         ScooterManager scooterManager = new ScooterManager(scooterMap, authenticationManager, rewardManager);
 
 
-        services.put(ManagerTags.AUTHENTICATION.tag, new AuthenticationManagerSkeleton(authenticationManager,
+        services.put(CommunicationTags.AUTHENTICATION_MAN.tag, new AuthenticationManagerSkeleton(authenticationManager,
                 responseManager, notificationManager));
-        services.put(ManagerTags.SCOOTER.tag, new ScooterManagerSkeleton(scooterManager,
+        services.put(CommunicationTags.SCOOTER_MAN.tag, new ScooterManagerSkeleton(scooterManager,
                 responseManager, rewardManager));
-        services.put(ManagerTags.NOTIFICATION.tag, new NotificationManagerSkeleton(notificationManager,
+        services.put(CommunicationTags.NOTIFICATION_MAN.tag, new NotificationManagerSkeleton(notificationManager,
                 responseManager));
 
 

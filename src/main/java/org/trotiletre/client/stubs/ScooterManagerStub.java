@@ -2,7 +2,7 @@ package org.trotiletre.client.stubs;
 
 import org.jetbrains.annotations.NotNull;
 import org.trotiletre.common.IScooterManager;
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.models.utils.GenericPair;
@@ -52,13 +52,13 @@ public class ScooterManagerStub implements IScooterManager {
 
         // Converting the ByteArrayOutputStream into a primitive byte[].
         byte[] data = dataStream.toByteArray();
-        connection.send(ManagerTags.SCOOTER.tag, data); // Sending the message to the server.
+        connection.send(CommunicationTags.SCOOTER_MAN.tag, data); // Sending the message to the server.
 
         // The response is a byte encoded string with all the locations. This means we just need to convert it back.
         // TaggedConnection.Frame frame = connection.receive();
         //return new String(frame.data, StandardCharsets.UTF_8); // Return the converted string from the bytes received.
 
-        byte[] receivedData = demultiplexer.receive(ManagerTags.SCOOTER.tag);
+        byte[] receivedData = demultiplexer.receive(CommunicationTags.SCOOTER_MAN.tag);
         return new String(receivedData, StandardCharsets.UTF_8);
     }
 
@@ -87,11 +87,11 @@ public class ScooterManagerStub implements IScooterManager {
         dataOutput.writeInt(local.y()); // Writing the y inital position.
         dataOutput.writeUTF(username); // Writing the username for authentication.
 
-        connection.send(ManagerTags.SCOOTER.tag, dataStream.toByteArray()); // Sending the message to the server.
+        connection.send(CommunicationTags.SCOOTER_MAN.tag, dataStream.toByteArray()); // Sending the message to the server.
 
         // Receiving the response from the server as a frame.
         // TaggedConnection.Frame frame = connection.receive();
-        byte[] receivedData = demultiplexer.receive(ManagerTags.SCOOTER.tag);
+        byte[] receivedData = demultiplexer.receive(CommunicationTags.SCOOTER_MAN.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
@@ -145,11 +145,11 @@ public class ScooterManagerStub implements IScooterManager {
         dataOutput.writeInt(newScooterLocation.y()); // Writing the y of the new position.
         dataOutput.writeUTF(username); // Writing the username for authentication.
 
-        connection.send(ManagerTags.SCOOTER.tag, dataStream.toByteArray()); // Sending the message to the server.
+        connection.send(CommunicationTags.SCOOTER_MAN.tag, dataStream.toByteArray()); // Sending the message to the server.
 
         // Receiving the response from the server as a frame.
         // TaggedConnection.Frame frame = connection.receive();
-        byte[] receivedData = demultiplexer.receive(ManagerTags.SCOOTER.tag);
+        byte[] receivedData = demultiplexer.receive(CommunicationTags.SCOOTER_MAN.tag);
 
         // Unwrapping the bytes received in data into a stream of bytes.
         ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
@@ -162,7 +162,9 @@ public class ScooterManagerStub implements IScooterManager {
          *   2 - User is not logged in.
          *   3 - Packet includes a bounty price.
          */
+        System.out.println("asd");
         int responseCode = response.readInt();
+        System.out.println("asd");
 
         if (responseCode == 1) return new GenericPair<>(-1d, null);
 

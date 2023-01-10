@@ -1,6 +1,6 @@
 package org.trotiletre.server.skeletons;
 
-import org.trotiletre.common.ManagerTags;
+import org.trotiletre.common.CommunicationTags;
 import org.trotiletre.common.NotificationOperations;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.models.utils.Location;
@@ -32,12 +32,12 @@ public class NotificationManagerSkeleton implements Skeleton {
             case REGISTER -> {
                 String user = dataInput.readUTF();
                 dataOutput.writeBoolean(this.notificationManager.register(user));
-                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), CommunicationTags.NOTIFICATION_MAN.tag);
             }
             case IS_REGISTERED -> {
                 String user = dataInput.readUTF();
                 dataOutput.writeBoolean(this.notificationManager.isRegistered(user));
-                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), CommunicationTags.NOTIFICATION_MAN.tag);
             }
             case ADD_LOCATION -> {
                 String user = dataInput.readUTF();
@@ -48,12 +48,12 @@ public class NotificationManagerSkeleton implements Skeleton {
                 int radius = dataInput.readInt();
                 boolean b = this.notificationManager.addLocation(user, location, radius);
                 dataOutput.writeBoolean(b);
-                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), CommunicationTags.NOTIFICATION_MAN.tag);
             }
             case REMOVE -> {
                 String user = dataInput.readUTF();
                 dataOutput.writeBoolean(this.notificationManager.remove(user));
-                this.responseManager.send(socketAddress, byteStream.toByteArray(), ManagerTags.NOTIFICATION.tag);
+                this.responseManager.send(socketAddress, byteStream.toByteArray(), CommunicationTags.NOTIFICATION_MAN.tag);
             }
         }
     }

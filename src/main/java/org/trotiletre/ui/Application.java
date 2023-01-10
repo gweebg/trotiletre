@@ -57,7 +57,7 @@ public class Application {
 
     public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
 
-        Application app = new Application("localhost", 20022);
+        Application app = new Application("localhost", 12345);
         app.run();
     }
 
