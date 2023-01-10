@@ -14,7 +14,8 @@ public class AuthenticationManager implements IAuthenticationManager {
     private Map<String, User> accounts = new HashMap<>();
     private ReentrantLock authLock = new ReentrantLock();
 
-    public AuthenticationManager() {}
+    public AuthenticationManager() {
+    }
 
     public boolean isUserOnline(String username) {
 
@@ -23,7 +24,9 @@ public class AuthenticationManager implements IAuthenticationManager {
             authLock.lock();
             return onlineAccounts.getOrDefault(username, false);
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
     public boolean registerUser(String username, String passwordHash) {
@@ -40,7 +43,9 @@ public class AuthenticationManager implements IAuthenticationManager {
 
             return false;
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
     public boolean loginUser(String username, String password) {
@@ -57,10 +62,11 @@ public class AuthenticationManager implements IAuthenticationManager {
             if (user != null && user.matchPassword(password)) {
                 onlineAccounts.put(username, true);
                 return true;
-            }
-            else return false;
+            } else return false;
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
     public boolean logoutUser(String username) {
@@ -78,7 +84,9 @@ public class AuthenticationManager implements IAuthenticationManager {
             }
             return false;
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
     public boolean changeNotificationStatus(String username, boolean state) throws IOException, InterruptedException {
@@ -95,7 +103,9 @@ public class AuthenticationManager implements IAuthenticationManager {
             }
             return false;
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
     public User getUser(String username) {
@@ -105,7 +115,9 @@ public class AuthenticationManager implements IAuthenticationManager {
             authLock.lock();
             return accounts.get(username);
 
-        } finally { authLock.unlock(); }
+        } finally {
+            authLock.unlock();
+        }
     }
 
 }

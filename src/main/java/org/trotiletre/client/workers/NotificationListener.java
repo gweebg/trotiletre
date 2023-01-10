@@ -1,7 +1,6 @@
 package org.trotiletre.client.workers;
 
 import org.trotiletre.common.AnswerTag;
-import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Demultiplexer;
 
 import java.io.ByteArrayInputStream;
@@ -42,14 +41,14 @@ public class NotificationListener implements Runnable {
                 DataInput dataInput = new DataInputStream(new ByteArrayInputStream(notificationData));
                 int numPaths = dataInput.readInt();
 
-                for(int i=0;i<numPaths;++i){
+                for (int i = 0; i < numPaths; ++i) {
                     int x = dataInput.readInt();
                     int y = dataInput.readInt();
                     int fx = dataInput.readInt();
                     int fy = dataInput.readInt();
                     double reward = dataInput.readDouble();
 
-                    System.out.println("\ntrotiletre.notif> Found reward: Start: ("+x+","+y+") End: ("+fx+","+fy+") Reward: "+reward+"€");
+                    System.out.println("\ntrotiletre.notif> Found reward: Start: (" + x + "," + y + ") End: (" + fx + "," + fy + ") Reward: " + reward + "€");
                 }
                 System.out.print("trotiletre>");
 

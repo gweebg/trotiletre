@@ -14,7 +14,7 @@ public class NotificationManagerStub implements INotificationManager {
     private final TaggedConnection connection;
     private final Demultiplexer demultiplexer;
 
-    public NotificationManagerStub(TaggedConnection connection, Demultiplexer demultiplexer){
+    public NotificationManagerStub(TaggedConnection connection, Demultiplexer demultiplexer) {
         this.connection = connection;
         this.demultiplexer = demultiplexer;
     }

@@ -9,18 +9,17 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ScooterMap {
 
+    private final int startingScooters;
+    private final ReentrantLock mapLock = new ReentrantLock();
     /**
      * + Assuma uma distribuição aleatória de uma dado número fixo de trotinetes pelo mapa,
      * todas livres, quando o servidor arranca.
      * <p>
      * + O mapa é uma matriz N x N locais, sendo as coordenadas geográficas pares discretos de índices.
-     *     + A distância entre dois pontos é medida pela distância de Manhattan.
+     * + A distância entre dois pontos é medida pela distância de Manhattan.
      */
 
     private List<Scooter>[][] map;
-    private final int startingScooters;
-
-    private final ReentrantLock mapLock = new ReentrantLock();
 
     public ScooterMap(final int mapSize, final int startingScooters) {
 
@@ -36,7 +35,7 @@ public class ScooterMap {
         this.startingScooters = startingScooters;
     }
 
-    public int getMapSize(){
+    public int getMapSize() {
         return this.map.length;
     }
 
@@ -63,7 +62,7 @@ public class ScooterMap {
 
             show();
         } finally {
-          mapLock.unlock();
+            mapLock.unlock();
         }
 
     }
@@ -82,7 +81,7 @@ public class ScooterMap {
                 for (int j = 0; j < map[i].length; j++) {
 
                     List<Scooter> scootersInLocation = map[i][j];
-                    int distance = distanceBetween(new Location(j,i), startingPoint);
+                    int distance = distanceBetween(new Location(j, i), startingPoint);
 
                     if (distance <= range && distance <= closestScooterDistance) {
 
@@ -117,10 +116,10 @@ public class ScooterMap {
                 for (int j = 0; j < map[i].length; j++) {
 
                     List<Scooter> scootersInLocation = map[i][j];
-                    int distance = distanceBetween(startingPoint, new Location(j,i));
+                    int distance = distanceBetween(startingPoint, new Location(j, i));
 
                     if (distance <= range) {
-                        for (Scooter s: scootersInLocation) {
+                        for (Scooter s : scootersInLocation) {
                             if (!s.isInUse()) {
                                 results.add(s);
                             }
@@ -136,7 +135,7 @@ public class ScooterMap {
         }
     }
 
-    public int getNumberOfScootersAt(int x, int y){
+    public int getNumberOfScootersAt(int x, int y) {
         this.mapLock.lock();
         try {
             return this.map[y][x].size();
@@ -146,41 +145,41 @@ public class ScooterMap {
     }
 
 
-    public Map<Location, Set<Location>> getRewardPaths(int emptyRadius){
+    public Map<Location, Set<Location>> getRewardPaths(int emptyRadius) {
         this.mapLock.lock();
         try {
             Map<Location, Set<Location>> rewardPaths = new HashMap<>();
-            if(emptyRadius<=0)
+            if (emptyRadius <= 0)
                 return rewardPaths;
 
             Set<Location> startList = new HashSet<>();
             Set<Location> finishList = new HashSet<>();
 
-            for(int y=0;y<this.map.length;++y){
-                for(int x=0;x<this.map.length;++x){
-                    if(this.map[y][x].size()>1)
-                        startList.add(new Location(x,y));
-                    else if(this.map[y][x].size()==0){
-                        boolean shouldHaveReward=true;
-                        for(int i=emptyRadius;i>=-emptyRadius && shouldHaveReward;--i){
-                            int yy=y+i;
-                            if(i==0 || yy<0 || yy>=this.map.length)
+            for (int y = 0; y < this.map.length; ++y) {
+                for (int x = 0; x < this.map.length; ++x) {
+                    if (this.map[y][x].size() > 1)
+                        startList.add(new Location(x, y));
+                    else if (this.map[y][x].size() == 0) {
+                        boolean shouldHaveReward = true;
+                        for (int i = emptyRadius; i >= -emptyRadius && shouldHaveReward; --i) {
+                            int yy = y + i;
+                            if (i == 0 || yy < 0 || yy >= this.map.length)
                                 continue;
-                            for(int j=emptyRadius;j>=-emptyRadius && shouldHaveReward;--j){
-                                int xx=x+j;
-                                if(j==0 || xx<0 || xx>=this.map.length)
+                            for (int j = emptyRadius; j >= -emptyRadius && shouldHaveReward; --j) {
+                                int xx = x + j;
+                                if (j == 0 || xx < 0 || xx >= this.map.length)
                                     continue;
                                 if (this.map[yy][xx].size() > 0) {
                                     shouldHaveReward = false;
                                 }
                             }
                         }
-                        if(shouldHaveReward)
-                            finishList.add(new Location(x,y));
+                        if (shouldHaveReward)
+                            finishList.add(new Location(x, y));
                     }
                 }
             }
-            for(Location start : startList)
+            for (Location start : startList)
                 rewardPaths.put(start, finishList);
 
             return rewardPaths;
@@ -193,6 +192,7 @@ public class ScooterMap {
     /**
      * Calculates the distance between to points ({@link Location}), using
      * the Manhattan distance: {@code |ax - bx| + |ay - by|}.
+     *
      * @param a First location.
      * @param b Second location.
      * @return Distance between the points.
@@ -205,8 +205,8 @@ public class ScooterMap {
     /**
      * Updates the location of a scooter in the scooter map.
      *
-     * @param a The old location of the scooter.
-     * @param b The new location of the scooter.
+     * @param a         The old location of the scooter.
+     * @param b         The new location of the scooter.
      * @param scooterId The identification of the scooter to update.
      */
     public void updateScooterLocation(Location a, Location b, String scooterId) {

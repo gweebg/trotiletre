@@ -1,13 +1,13 @@
 package org.trotiletre.server;
 
+import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.server.services.*;
 import org.trotiletre.server.skeletons.AuthenticationManagerSkeleton;
-import org.trotiletre.common.ManagerTag;
 import org.trotiletre.server.skeletons.NotificationManagerSkeleton;
 import org.trotiletre.server.skeletons.ScooterManagerSkeleton;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -46,6 +46,13 @@ public class RMIServer {
 
     }
 
+    public static void main(String[] args) throws Exception {
+
+        RMIServer server = new RMIServer(12345);
+        server.runServer();
+
+    }
+
     /**
      * Runs the server and listens for incoming connections.
      * <p>
@@ -58,7 +65,7 @@ public class RMIServer {
 
         System.out.println("Running server...");
 
-        ScooterMap scooterMap = new ScooterMap(4,4);
+        ScooterMap scooterMap = new ScooterMap(10, 10);
 
         // Map of service skeletons keyed by service ID.
         Map<Integer, Skeleton> services = new HashMap<>();
@@ -93,13 +100,6 @@ public class RMIServer {
                 System.out.println(e.getMessage());
             }
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        RMIServer server = new RMIServer(12345);
-        server.runServer();
-
     }
 
 }

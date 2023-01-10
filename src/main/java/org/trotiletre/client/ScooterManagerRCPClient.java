@@ -28,6 +28,15 @@ public class ScooterManagerRCPClient {
         this.connection = new TaggedConnection(clientSocket);
     }
 
+    public static void main(String[] args) throws IOException, InterruptedException {
+
+        ScooterManagerRCPClient client = new ScooterManagerRCPClient(
+                "localhost",
+                20022);
+
+        client.run();
+    }
+
     public void run() throws IOException, InterruptedException {
 
         Demultiplexer demultiplexer = new Demultiplexer(connection);
@@ -55,7 +64,7 @@ public class ScooterManagerRCPClient {
         System.in.read();
 
         String freeScooters = scooterManager.listFreeScooters(
-                2, new Location(0,0));
+                2, new Location(0, 0));
         System.out.println("Available scooters: " + freeScooters);
         System.in.read();
 
@@ -76,14 +85,5 @@ public class ScooterManagerRCPClient {
         else System.out.println("You have been charged " + parkPrice.getFirst() + "€");
 
         System.in.read();
-    }
-
-    public static void main(String[] args) throws IOException, InterruptedException {
-
-        ScooterManagerRCPClient client = new ScooterManagerRCPClient(
-                "localhost",
-                20022);
-
-        client.run();
     }
 }

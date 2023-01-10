@@ -26,8 +26,8 @@ public class ScooterManagerStub implements IScooterManager {
      * @param connection a {@link TaggedConnection} object representing the connection to the client.
      */
     public ScooterManagerStub(TaggedConnection connection, Demultiplexer demultiplexer) {
-            this.connection = connection;
-            this.demultiplexer = demultiplexer;
+        this.connection = connection;
+        this.demultiplexer = demultiplexer;
     }
 
     @Override
@@ -163,9 +163,7 @@ public class ScooterManagerStub implements IScooterManager {
          *   2 - User is not logged in.
          *   3 - Packet includes a bounty price.
          */
-        System.out.println("asd");
         int responseCode = response.readInt();
-        System.out.println("asd");
 
         if (responseCode == 1) return new GenericPair<>(-1d, null);
 

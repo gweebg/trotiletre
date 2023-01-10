@@ -1,20 +1,16 @@
 package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.AnswerTag;
-import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.models.utils.GenericPair;
-import org.trotiletre.server.services.RewardManager;
-import org.trotiletre.server.services.ResponseManager;
 import org.trotiletre.models.utils.Location;
 import org.trotiletre.server.services.AuthenticationManager;
+import org.trotiletre.server.services.ResponseManager;
+import org.trotiletre.server.services.RewardManager;
 import org.trotiletre.server.services.ScooterManager;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInput;
-import java.io.DataInputStream;
-import java.net.SocketAddress;
 import java.io.*;
+import java.net.SocketAddress;
 import java.util.List;
 
 /**
@@ -45,7 +41,7 @@ public class ScooterManagerSkeleton implements Skeleton {
      * This method, receives the data from a request from a user, processes it and
      * replies to the client with the answer.
      *
-     * @param data Data received from the connection.
+     * @param data          Data received from the connection.
      * @param socketAddress The socket to the client object.
      * @throws Exception If it can't communicate with the client.
      */
@@ -271,7 +267,7 @@ public class ScooterManagerSkeleton implements Skeleton {
 
             dataOutput.writeInt(rewardList.size());
 
-            for (RewardManager.RewardPath r: rewardList) {
+            for (RewardManager.RewardPath r : rewardList) {
                 dataOutput.writeUTF(r.toString());
             }
 

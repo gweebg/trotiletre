@@ -4,7 +4,7 @@ import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.common.communication.TaggedConnection;
 import org.trotiletre.server.services.ResponseManager;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
 import java.util.Map;
 
@@ -15,10 +15,10 @@ import java.util.Map;
  */
 public class Worker implements Runnable {
 
+    private final ResponseManager responseManager;
     private Socket socket;
     private TaggedConnection connection;
     private Map<Integer, Skeleton> services;
-    private final ResponseManager responseManager;
 
     public Worker(Socket socket, Map<Integer, Skeleton> services, ResponseManager responseManager) throws IOException {
         this.socket = socket;

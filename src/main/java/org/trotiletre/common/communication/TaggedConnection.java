@@ -20,28 +20,6 @@ public class TaggedConnection implements AutoCloseable {
     private ReentrantLock receiveLock = new ReentrantLock(); // Lock for receiving frames.
 
     /**
-     * A class that represents a frame.
-     * <p>
-     * A frame consists of a tag and a payload of data.
-     */
-    public static class Frame {
-
-        public final int tag;
-        public final byte[] data;
-
-        /**
-         * Constructs a new frame with the given tag and data.
-         *
-         * @param tag The tag for the frame.
-         * @param data The payload of data for the frame.
-         */
-        public Frame(int tag, byte[] data) {
-            this.tag = tag;
-            this.data = data;
-        }
-    }
-
-    /**
      * Constructs a new tagged connection from the given socket.
      *
      * @param socket The socket to wrap.
@@ -68,7 +46,7 @@ public class TaggedConnection implements AutoCloseable {
     /**
      * Sends a frame with the given tag and data payload over the connection.
      *
-     * @param tag The tag of the frame.
+     * @param tag  The tag of the frame.
      * @param data The data payload of the frame.
      * @throws IOException If an error occurs while sending the frame.
      */
@@ -123,5 +101,27 @@ public class TaggedConnection implements AutoCloseable {
     @Override
     public void close() throws Exception {
         socket.close();
+    }
+
+    /**
+     * A class that represents a frame.
+     * <p>
+     * A frame consists of a tag and a payload of data.
+     */
+    public static class Frame {
+
+        public final int tag;
+        public final byte[] data;
+
+        /**
+         * Constructs a new frame with the given tag and data.
+         *
+         * @param tag  The tag for the frame.
+         * @param data The payload of data for the frame.
+         */
+        public Frame(int tag, byte[] data) {
+            this.tag = tag;
+            this.data = data;
+        }
     }
 }

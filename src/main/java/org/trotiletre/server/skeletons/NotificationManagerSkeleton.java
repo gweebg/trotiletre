@@ -1,7 +1,6 @@
 package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.AnswerTag;
-import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.NotificationOperations;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.models.utils.Location;
@@ -15,7 +14,7 @@ public class NotificationManagerSkeleton implements Skeleton {
     private final NotificationManager notificationManager;
     private final ResponseManager responseManager;
 
-    public NotificationManagerSkeleton(NotificationManager notificationManager, ResponseManager responseManager){
+    public NotificationManagerSkeleton(NotificationManager notificationManager, ResponseManager responseManager) {
         this.notificationManager = notificationManager;
         this.responseManager = responseManager;
     }
@@ -29,7 +28,7 @@ public class NotificationManagerSkeleton implements Skeleton {
 
         NotificationOperations op = NotificationOperations.fromInt(dataInput.readInt());
 
-        switch (op){
+        switch (op) {
             case REGISTER -> {
                 String user = dataInput.readUTF();
                 dataOutput.writeBoolean(this.notificationManager.register(user));

@@ -9,10 +9,10 @@ public record Location(int x, int y) {
 
     @Override
     public String toString() {
-        return "("+ x + "," + y + ")";
+        return "(" + x + "," + y + ")";
     }
 
-    public int manhattanDistance(Location other){
+    public int manhattanDistance(Location other) {
         return Math.abs(this.x - other.x) + Math.abs(this.y - other.y);
     }
 

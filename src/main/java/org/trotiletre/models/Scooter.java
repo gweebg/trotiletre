@@ -17,8 +17,8 @@ public class Scooter {
      * Constructs a new scooter with the given information.
      *
      * @param scooterId The ID of the scooter.
-     * @param location The location of the scooter.
-     * @param inUse Whether the scooter is in use or not.
+     * @param location  The location of the scooter.
+     * @param inUse     Whether the scooter is in use or not.
      */
     public Scooter(String scooterId, Location location, boolean inUse) {
         this.scooterId = scooterId;

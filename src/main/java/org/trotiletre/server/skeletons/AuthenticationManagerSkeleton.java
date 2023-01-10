@@ -1,7 +1,6 @@
 package org.trotiletre.server.skeletons;
 
 import org.trotiletre.common.AnswerTag;
-import org.trotiletre.common.ManagerTag;
 import org.trotiletre.common.communication.Skeleton;
 import org.trotiletre.server.services.AuthenticationManager;
 import org.trotiletre.server.services.NotificationManager;
@@ -154,6 +153,7 @@ public class AuthenticationManagerSkeleton implements Skeleton {
 
     /**
      * Getter for the authentication manager.
+     *
      * @return The {@link AuthenticationManager} object.
      */
     public AuthenticationManager getAuth() {

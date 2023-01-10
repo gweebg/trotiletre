@@ -1,6 +1,7 @@
 package org.trotiletre.common.communication;
 
 import org.trotiletre.common.communication.TaggedConnection.Frame;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -21,20 +22,11 @@ public class Demultiplexer {
     private ReentrantLock demultiplexerLock = new ReentrantLock(); // Lock for thread safe usage.
 
     /**
-     * A class that represents a buffer for incoming {@link Frame} objects.
-     */
-    public class FrameBuffer {
-        public int waiters = 0; // The number of messages waiting on this FrameBuffer.
-        public Queue<byte[]> queue = new ArrayDeque<>(); // A queue of byte arrays that represent the incoming Frame data.
-        public Condition c = demultiplexerLock.newCondition(); // A condition object used to signal waiting threads when new data is available in the buffer.
-    }
-
-    /**
      * Constructs a new {@code Demultiplexer} object.
      *
      * @param c a {@link TaggedConnection} object representing the connection to the client
      */
-    public Demultiplexer(TaggedConnection c){
+    public Demultiplexer(TaggedConnection c) {
         this.connection = c;
     }
 
@@ -65,13 +57,11 @@ public class Demultiplexer {
                         // Add the frame data to the queue and signal any waiting threads.
                         buffer.queue.add(frame.data);
                         buffer.c.signal();
-                    }
-                    finally {
+                    } finally {
                         demultiplexerLock.unlock();
                     }
                 }
-            }
-            catch (IOException err) {
+            } catch (IOException err) {
                 // If there is an exception, store it in the exception field
                 exception = err;
             }
@@ -86,7 +76,7 @@ public class Demultiplexer {
      *
      * @param tag The tag of the frame to receive.
      * @return The data of the received frame as a {@code byte} array.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException          If an I/O error occurs.
      * @throws InterruptedException If the thread is interrupted while waiting for a frame to be received.
      */
     public byte[] receive(int tag) throws IOException, InterruptedException {
@@ -106,10 +96,10 @@ public class Demultiplexer {
 
             // Increment the number of waiters on this FrameBuffer.
             buffer.waiters++;
-            while(true) {
+            while (true) {
 
                 // If the queue is not empty, return the first element.
-                if(!buffer.queue.isEmpty()) {
+                if (!buffer.queue.isEmpty()) {
 
                     buffer.waiters--;
                     byte[] reply = buffer.queue.poll();
@@ -129,8 +119,9 @@ public class Demultiplexer {
                 // If the queue is empty, wait for a new frame to be received.
                 buffer.c.await();
             }
+        } finally {
+            demultiplexerLock.unlock();
         }
-        finally { demultiplexerLock.unlock(); }
     }
 
     /**
@@ -146,5 +137,14 @@ public class Demultiplexer {
             // If there is an exception, wrap it in a RuntimeException and throw it.
             throw new RuntimeException(err);
         }
+    }
+
+    /**
+     * A class that represents a buffer for incoming {@link Frame} objects.
+     */
+    public class FrameBuffer {
+        public int waiters = 0; // The number of messages waiting on this FrameBuffer.
+        public Queue<byte[]> queue = new ArrayDeque<>(); // A queue of byte arrays that represent the incoming Frame data.
+        public Condition c = demultiplexerLock.newCondition(); // A condition object used to signal waiting threads when new data is available in the buffer.
     }
 }

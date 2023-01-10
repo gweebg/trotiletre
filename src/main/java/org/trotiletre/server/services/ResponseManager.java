@@ -16,37 +16,23 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class ResponseManager {
 
-    private static class SenderInfo{
-        public final SocketAddress address;
-        public int resourceUsers;
-        public final BlockingDeque<SenderData> dataQueue;
-
-        public SenderInfo(SocketAddress address, BlockingDeque<SenderData> dataQueue){
-            this.address = address;
-            this.dataQueue = dataQueue;
-            this.resourceUsers = 1;
-        }
-    }
-    protected record SenderData(byte[] data, int tag, boolean stop){}
     private final Map<SocketAddress, SenderInfo> senderMap = new HashMap<>();
     private final Map<String, SocketAddress> userMap = new HashMap<>();
     private final Map<SocketAddress, String> socketMap = new HashMap<>();
     private final Lock mapLock = new ReentrantLock();
     private final ExecutorService executorService = Executors.newCachedThreadPool();
 
-
-    public void register(Socket socket){
+    public void register(Socket socket) {
         mapLock.lock();
-        try{
+        try {
             SocketAddress socketAddress = socket.getRemoteSocketAddress();
-            if(!this.senderMap.containsKey(socketAddress)){
+            if (!this.senderMap.containsKey(socketAddress)) {
                 SenderInfo sdata = new SenderInfo(socketAddress, new LinkedBlockingDeque<>());
                 this.senderMap.put(socketAddress, sdata);
                 this.executorService.execute(new RespondingThread(sdata.dataQueue, socket));
-            }
-            else{
+            } else {
                 SenderInfo sdata = this.senderMap.get(socketAddress);
-                sdata.resourceUsers +=1;
+                sdata.resourceUsers += 1;
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -55,10 +41,10 @@ public class ResponseManager {
         }
     }
 
-    public void registerUser(String user, SocketAddress socketAddress){
+    public void registerUser(String user, SocketAddress socketAddress) {
         mapLock.lock();
         try {
-            if(!this.senderMap.containsKey(socketAddress) || this.userMap.containsKey(user))
+            if (!this.senderMap.containsKey(socketAddress) || this.userMap.containsKey(user))
                 return;
 
             this.userMap.put(user, socketAddress);
@@ -69,25 +55,24 @@ public class ResponseManager {
         }
     }
 
-    public void send(SocketAddress socketAddress, byte[] data, int tag){
+    public void send(SocketAddress socketAddress, byte[] data, int tag) {
         mapLock.lock();
         try {
             SenderInfo senderInfo = this.senderMap.get(socketAddress);
-            if(senderInfo==null)
+            if (senderInfo == null)
                 return;
 
             senderInfo.dataQueue.add(new SenderData(data, tag, false));
-        }
-        finally {
+        } finally {
             mapLock.unlock();
         }
     }
 
-    public void send(String user, byte[] data, int tag){
+    public void send(String user, byte[] data, int tag) {
         mapLock.lock();
         try {
             SocketAddress socketAddress = this.userMap.get(user);
-            if(socketAddress==null)
+            if (socketAddress == null)
                 return;
 
             this.send(socketAddress, data, tag);
@@ -96,33 +81,32 @@ public class ResponseManager {
         }
     }
 
-    public void remove(SocketAddress socketAddress){
+    public void remove(SocketAddress socketAddress) {
         mapLock.lock();
-        try{
-            if(!this.senderMap.containsKey(socketAddress))
+        try {
+            if (!this.senderMap.containsKey(socketAddress))
                 return;
 
             SenderInfo senderInfo = this.senderMap.get(socketAddress);
             senderInfo.resourceUsers--;
-            if(senderInfo.resourceUsers==0){
+            if (senderInfo.resourceUsers == 0) {
                 senderInfo.dataQueue.add(new SenderData(null, -1, true));
                 this.senderMap.remove(socketAddress);
                 String user = this.socketMap.remove(socketAddress);
-                if(user!=null){
+                if (user != null) {
                     this.userMap.remove(user);
                 }
             }
-        }
-        finally {
+        } finally {
             mapLock.unlock();
         }
     }
 
-    public void removeUser(String user){
+    public void removeUser(String user) {
         mapLock.lock();
         try {
             SocketAddress address = this.userMap.remove(user);
-            if(address==null)
+            if (address == null)
                 return;
 
             this.socketMap.remove(address);
@@ -132,12 +116,28 @@ public class ResponseManager {
         }
     }
 
+    private static class SenderInfo {
+        public final SocketAddress address;
+        public final BlockingDeque<SenderData> dataQueue;
+        public int resourceUsers;
+
+        public SenderInfo(SocketAddress address, BlockingDeque<SenderData> dataQueue) {
+            this.address = address;
+            this.dataQueue = dataQueue;
+            this.resourceUsers = 1;
+        }
+    }
+
+    protected record SenderData(byte[] data, int tag, boolean stop) {
+    }
+
 }
 
-class RespondingThread implements Runnable{
+class RespondingThread implements Runnable {
 
     private final BlockingDeque<ResponseManager.SenderData> dataQueue;
     private final TaggedConnection taggedConnection;
+
     public RespondingThread(BlockingDeque<ResponseManager.SenderData> dataQueue, Socket socket) throws IOException {
         this.dataQueue = dataQueue;
         this.taggedConnection = new TaggedConnection(socket);
@@ -145,15 +145,15 @@ class RespondingThread implements Runnable{
 
     @Override
     public void run() {
-        while(true){
+        while (true) {
             ResponseManager.SenderData senderData;
-            try{
+            try {
                 senderData = this.dataQueue.take();
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 e.printStackTrace();
                 return;
             }
-            if(senderData.stop())
+            if (senderData.stop())
                 return;
 
             try {

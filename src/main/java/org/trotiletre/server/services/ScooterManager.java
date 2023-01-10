@@ -2,11 +2,11 @@ package org.trotiletre.server.services;
 
 import org.jetbrains.annotations.NotNull;
 import org.trotiletre.common.IScooterManager;
+import org.trotiletre.models.Reservation;
 import org.trotiletre.models.Scooter;
 import org.trotiletre.models.User;
 import org.trotiletre.models.utils.GenericPair;
 import org.trotiletre.models.utils.Location;
-import org.trotiletre.models.Reservation;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -44,7 +44,7 @@ public class ScooterManager implements IScooterManager {
         map.populateMap(); // Populate the map with scooters.
     }
 
-    public ScooterMap getScooterMap(){
+    public ScooterMap getScooterMap() {
         return this.map;
     }
 
@@ -52,7 +52,7 @@ public class ScooterManager implements IScooterManager {
      * Returns a list of the locations of free scooters within the given range of the lookup position.
      * Tested ✅
      *
-     * @param range The maximum range in meters to search for free scooters.
+     * @param range          The maximum range in meters to search for free scooters.
      * @param lookupPosition The position to use as the center of the search.
      * @return A list of the locations of free scooters within the given range, separated by commas.
      */
@@ -76,8 +76,8 @@ public class ScooterManager implements IScooterManager {
      * When done, return the location of the scooter and the reservation code.
      * Tested ✅
      *
-     * @param range The range to lookup within.
-     * @param local The local to start searching.
+     * @param range    The range to lookup within.
+     * @param local    The local to start searching.
      * @param username The user's username, for cool information purpouses.
      * @return String containing the location and reservation code. Null if there are no scooters.
      */
@@ -104,7 +104,9 @@ public class ScooterManager implements IScooterManager {
                 return new GenericPair<>(reservationCode.toString(), scooterLocation);
             }
 
-        } finally { managerLock.unlock(); }
+        } finally {
+            managerLock.unlock();
+        }
 
         return null;
     }
@@ -112,7 +114,7 @@ public class ScooterManager implements IScooterManager {
     /**
      * Park a scooter by providing a previously generated reservation code.
      *
-     * @param reservationCode Reservation code for the scooter.
+     * @param reservationCode    Reservation code for the scooter.
      * @param newScooterLocation The new location of the scooter.
      * @return The price to pay for the travel or {@code -1} if the {@code reservationCode} is on correct.
      */
@@ -141,7 +143,7 @@ public class ScooterManager implements IScooterManager {
             // Get bounty if exists
             Optional<Double> rewardOpt = this.rewardManager.getReward(scooter.getLocation(), newScooterLocation);
             Double reward = null;
-            if(rewardOpt.isPresent())
+            if (rewardOpt.isPresent())
                 reward = rewardOpt.get();
 
             // Update the location of the scooter to the new location provided.
@@ -158,7 +160,9 @@ public class ScooterManager implements IScooterManager {
 
             return new GenericPair<>(priceToPay, reward);
 
-        } finally { managerLock.unlock(); }
+        } finally {
+            managerLock.unlock();
+        }
     }
 
     public AuthenticationManager getAuthManager() {

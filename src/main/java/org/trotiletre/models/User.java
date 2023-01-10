@@ -1,7 +1,6 @@
 package org.trotiletre.models;
 
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.trotiletre.models.utils.Location;
 
 /**
  * A class that represents a user in the application.
@@ -35,7 +34,7 @@ public class User {
      * @param password The plaintext password to be set.
      */
     public void setPassword(String password) {
-        Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15*1024, 2);
+        Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15 * 1024, 2);
         this.passwordHash = encoder.encode(password);
     }
 
@@ -46,7 +45,7 @@ public class User {
      * @return {@code true} if they match, {@code false} otherwise.
      */
     public boolean matchPassword(String password) {
-        Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15*1024, 2);
+        Argon2PasswordEncoder encoder = new Argon2PasswordEncoder(32, 64, 1, 15 * 1024, 2);
         return encoder.matches(password, passwordHash);
     }
 

@@ -12,16 +12,14 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Processor {
 
+    private final NotificationManagerStub notificationManager;
     private ScooterManagerStub scooterManager;
     private AuthenticationManagerStub authManager;
-    private final NotificationManagerStub notificationManager;
-
     private Map<String, Pattern> operationPatterns = new HashMap<>();
     private Map<String, Method> operations = new HashMap<>();
 
@@ -93,10 +91,10 @@ public class Processor {
 
                 loggedInAs = "";
 
-            } else System.out.println("trotiletre.error> You cannot sign out user '" + username + "' when you are using another account.");
+            } else
+                System.out.println("trotiletre.error> You cannot sign out user '" + username + "' when you are using another account.");
 
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'logout' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'logout' command, check the help menu.");
     }
 
     public void processList(String userCommand) throws IOException, InterruptedException {
@@ -160,16 +158,15 @@ public class Processor {
                 return;
             }
             boolean notifState;
-            if(state)
+            if (state)
                 notifState = notificationManager.register(loggedInAs);
             else
                 notifState = notificationManager.remove(loggedInAs);
 
-            if (notifState) System.out.println("trotiletre.info> Changed push notifications to "+ possibleState +".");
+            if (notifState) System.out.println("trotiletre.info> Changed push notifications to " + possibleState + ".");
             else System.out.println("trotiletre.error> You need to be logged in to use this action");
 
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
 
     }
 
@@ -177,17 +174,16 @@ public class Processor {
         Pattern parkPattern = operationPatterns.get("notiflocation");
         Matcher m = parkPattern.matcher(userCommand);
 
-        if(m.find()){
+        if (m.find()) {
             int xLocation = Integer.parseInt(m.group(1));
             int yLocation = Integer.parseInt(m.group(2));
             int radius = Integer.parseInt(m.group(3));
 
             boolean b = notificationManager.addLocation(loggedInAs, new Location(xLocation, yLocation), radius);
 
-            if(b) System.out.println("trotiletre.info> Added new location to receive notifications");
+            if (b) System.out.println("trotiletre.info> Added new location to receive notifications");
             else System.out.println("trotiletre.error> Could not add location");
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'notiflocation' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'notiflocation' command, check the help menu.");
 
     }
 
@@ -214,8 +210,7 @@ public class Processor {
                 System.out.println("trotiletre.info> You have been charged " + parkPrice.getFirst() + "€");
             }
 
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'park' command, check the help menu.");
     }
 
     public void processSetRange(String userCommand) {
@@ -228,8 +223,7 @@ public class Processor {
             this.range = Integer.parseInt(m.group(1));
 
             System.out.println("trotiletre.info> Range is set to " + range + ".");
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'setrange' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'setrange' command, check the help menu.");
     }
 
     public void processSetLocation(String userCommand) {
@@ -244,8 +238,7 @@ public class Processor {
 
             currentLocation = new Location(xLocation, yLocation);
             System.out.println("trotiletre.info> Location is set to " + currentLocation + ".");
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'setlocation' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'setlocation' command, check the help menu.");
     }
 
     public void processRegister(String userCommand) throws IOException, InterruptedException {
@@ -262,8 +255,7 @@ public class Processor {
 
             if (registerStatus) System.out.println("trotiletre.info> Successfully registered as '" + username + "'.");
             else System.out.println("trotiletre.error> Account already exists!");
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'register' command, check the help menu.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'register' command, check the help menu.");
     }
 
     public void processLogin(String userCommand) throws IOException, InterruptedException {
@@ -281,10 +273,8 @@ public class Processor {
             if (loginStatus) {
                 System.out.println("trotiletre.info> Successfully logged in as '" + username + "'.");
                 loggedInAs = username;
-            }
-            else System.out.println("trotiletre.error> Invalid username or password.");
-        }
-        else System.out.println("trotiletre.error> Invalid usage of 'login' command, check the help menu.");
+            } else System.out.println("trotiletre.error> Invalid username or password.");
+        } else System.out.println("trotiletre.error> Invalid usage of 'login' command, check the help menu.");
     }
 
     public void process(String userCommand) throws InvocationTargetException, IllegalAccessException {

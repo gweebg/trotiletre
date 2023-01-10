@@ -6,7 +6,6 @@ import org.trotiletre.client.stubs.ScooterManagerStub;
 import org.trotiletre.client.workers.NotificationListener;
 import org.trotiletre.common.communication.Demultiplexer;
 import org.trotiletre.common.communication.TaggedConnection;
-import org.trotiletre.server.services.NotificationManager;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -41,6 +40,12 @@ public class Application {
         new Thread(new NotificationListener(demultiplexer)).start();
     }
 
+    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+
+        Application app = new Application("localhost", 12345);
+        app.run();
+    }
+
     public void run() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         Scanner userInput = new Scanner(System.in);
@@ -53,12 +58,6 @@ public class Application {
             proc.process(userCommand);
         }
 
-    }
-
-    public static void main(String[] args) throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-
-        Application app = new Application("localhost", 12345);
-        app.run();
     }
 
 }
