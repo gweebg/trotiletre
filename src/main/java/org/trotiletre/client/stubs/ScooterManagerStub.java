@@ -179,4 +179,46 @@ public class ScooterManagerStub implements IScooterManager {
             return new GenericPair<>(priceToPay, bounty);
         }
     }
+
+    public String listRewards(Location local, int range) throws IOException, InterruptedException {
+
+
+        /*
+         * This section handles the requests for listing rewards.
+         * The message we are expecting to receive will have:
+         *  + x coordinate of the new position: Integer.
+         *  + y coordinate of the new position: Integer.
+         *  + range of the search.
+         */
+
+        // Creating our own byte stream, so we can send it via tagged connection.
+        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
+        DataOutput dataOutput = new DataOutputStream(dataStream);
+
+        dataOutput.writeInt(3); // Writing the operation we want to use.
+
+        dataOutput.writeInt(local.x()); // Writing the x of the new position.
+        dataOutput.writeInt(local.y()); // Writing the y of the new position.
+        dataOutput.writeInt(range); // Writing the username for authentication.
+
+        connection.send(ManagerTags.SCOOTER.tag, dataStream.toByteArray()); // Sending the message to the server.
+
+        // Receiving the response from the server as a frame.
+        // TaggedConnection.Frame frame = connection.receive();
+        byte[] receivedData = demultiplexer.receive(ManagerTags.SCOOTER.tag);
+
+        // Unwrapping the bytes received in data into a stream of bytes.
+        ByteArrayInputStream responseStream = new ByteArrayInputStream(receivedData);
+        DataInput response = new DataInputStream(responseStream);
+
+        int length = response.readInt();
+
+        StringBuilder rewards = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            rewards.append(response.readUTF() + "\n");
+        }
+
+        return rewards.toString();
+    }
 }

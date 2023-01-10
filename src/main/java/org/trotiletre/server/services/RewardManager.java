@@ -10,7 +10,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class RewardManager {
-    public record RewardPath(Location start, Location finish, double reward){}
+    public record RewardPath(Location start, Location finish, double reward){
+        @Override
+        public String toString() {
+            return "Start: " + start.toString() + "End: " + finish.toString() + "For: " + reward + "€";
+        }
+    }
     private static class WorkSignaller{
         private final Lock workLock = new ReentrantLock();
         private final Condition workCond = workLock.newCondition();
@@ -125,7 +130,7 @@ public class RewardManager {
         this.workSignaller.signal();
     }
 
-    public List<RewardPath> getRewardPaths(Location start, int radius){
+    public List<RewardPath> getRewardPaths(Location start, int radius) {
         rewardPathLock.lock();
         try {
             List<RewardPath> rewardPathList = new ArrayList<>();

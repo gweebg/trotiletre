@@ -64,7 +64,16 @@ public class Processor {
         operations.put("notif", this.getClass().getMethod("processNotif", String.class));
 
         operationPatterns.put("sendNotifLoc", Pattern.compile("sendNotifLoc\\s+(\\d+)\\s+(\\d+)\\s+(\\d+)"));
-        operations.put("sendNotifLoc", this.getClass().getMethod("processSendNotifLoc", String.class));
+        operations.put("sendNotifLoc", this.getClass().getMethod("processNotifLoc", String.class));
+
+        operations.put("listr", this.getClass().getMethod("processListRewards", String.class));
+
+    }
+
+    public void processListRewards(String userCommand) throws IOException, InterruptedException {
+
+        String listStatus = scooterManager.listRewards(currentLocation, range);
+        System.out.println("trotiletre.info> Available rewards in your area:\n" + listStatus);
     }
 
     public void processLogout(String userCommand) throws IOException, InterruptedException {
